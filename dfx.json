@@ -4,6 +4,10 @@
       "main": "src/funti3r_backend/main.mo",
       "type": "motoko"
     },
+    "funti3r_binder": {
+      "main": "src/funti3r_binder/main.mo",
+      "type": "motoko"
+    },
     "funti3r_frontend": {
       "dependencies": [
         "funti3r_backend"
@@ -29,7 +33,7 @@
   "defaults": {
     "build": {
       "args": "",
-      "packtool": ""
+      "packtool": "mops sources"
     }
   },
   "output_env_file": ".env",

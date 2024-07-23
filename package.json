@@ -14,5 +14,8 @@
   "type": "module",
   "workspaces": [
     "src/funti3r_frontend"
-  ]
+  ],
+  "dependencies": {
+    "mo-dev": "^0.13.0"
+  }
 }
