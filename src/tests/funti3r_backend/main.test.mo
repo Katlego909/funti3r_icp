@@ -14,6 +14,15 @@ let userdetails : types.UserDetailsRecord = {
                 socials = List.nil<Text>(); // contains links to the users socials
                 description = "Hey I am voldi";
              };
+let userdetail2 : types.UserDetailsRecord = {
+                name  = "voldi----------------changed";
+                email = "voldi@gmail.com";
+                phone  = "0732323242";
+                location = "some place in SA";
+                qualifications  = List.nil<Text>(); // list of qualifications
+                socials = List.nil<Text>(); // contains links to the users socials
+                description = "Hey I am voldi";
+             };
 
 suite("test user profile creation and authentication", func() : async () {
       await test("test login without a profile", func() : async () {
@@ -28,6 +37,6 @@ suite("test user profile creation and authentication", func() : async () {
 
      await test("login user after profile creation", func() : async() {
         let result = await canister.loginUser();
-        assert result == ?userdetails;
+        assert result == ?userdetails2;
      });
 });
