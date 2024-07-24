@@ -16,6 +16,7 @@
     "src/funti3r_frontend"
   ],
   "dependencies": {
-    "mo-dev": "^0.13.0"
+    "mo-dev": "^0.13.0",
+    "moc": "^0.1.5"
   }
 }

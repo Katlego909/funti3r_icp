@@ -3,3 +3,8 @@ base = "0.11.3"
 map = "9.0.1"
 test = "2.0.0"
 sha2 = "0.1.0"
+
+[toolchain]
+moc = "0.11.3"
+wasmtime = "23.0.1"
+pocket-ic = "5.0.0"
