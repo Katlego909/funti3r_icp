@@ -1,5 +1,5 @@
 import List "mo:base/List";
-
+import types "../../Types/types";
 
 module  {
 public class UserDetails (_name: Text, 
@@ -17,7 +17,7 @@ _description: Text) {
     var qualifications = _qualifications; // list of qualifications
     var socials = _socials; // contains links to the users socials
     var description = _description;
-
+       var subscription: types.SubscriptionModel = #none;
     // Getters
     public func getName(): Text { name };
     public func getEmail(): Text { email };
@@ -26,6 +26,7 @@ _description: Text) {
     public func getQualifications(): List.List<Text> { qualifications };
     public func getSocials(): List.List<Text> { socials };
     public func getDescription(): Text { description };
+    public func getSubscription(): types.SubscriptionModel { subscription};
 
     // Setters
     public func setName(newName: Text) { name := newName };
@@ -35,5 +36,8 @@ _description: Text) {
     public func setQualifications(newQualifications: List.List<Text>) { qualifications := newQualifications };
     public func setSocials(newSocials: List.List<Text>) { socials := newSocials };
     public func setDescription(newDescription: Text) { description := newDescription };
+       public func setSubscription(newSubscription: types.SubscriptionModel) {
+        subscription := newSubscription;
+    }
 }
 }

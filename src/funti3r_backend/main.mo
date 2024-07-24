@@ -1,15 +1,23 @@
 import Map "mo:map/Map";
 import types "../Types/types";
-import {phash} "mo:map/Map";
+import {phash; ihash} "mo:map/Map";
 import Principal "mo:base/Principal";
+import Nat "mo:base/Nat";
+import Bool "mo:base/Bool";
+import List "mo:base/List";
 import  userInfo "components/UserDetails";
 import  businesInfo "components/BusinessDetails";
-
+import Task "components/Task";
 
 actor class  Main () {
  let users = Map.new<Principal, userInfo.UserDetails>();
  let businesses = Map.new<Principal,businesInfo.BusinessDetails>();
+ // map of (key = id of task, value = Task)
+ let listedTask= Map.new<Nat, Task.Task>();
+ 
 
+ var taskCounter : Nat = 0; // for dev purposes only
+ 
  // a utility function to check if a user is authorized to access a specific resource
  private func verifyCaller(p : Principal) : async () {
      if (Principal.isAnonymous(p) or (not (await userExists(p)) or (not (await businessExists(p))))) {
@@ -81,6 +89,7 @@ actor class  Main () {
               qualifications = value.getQualifications(); // list of qualifications
               socials = value.getSocials(); // contains links to the users socials
               description = value.getDescription();
+              subscription =  value.getSubscription();
             };
             return ?userDetails; 
           }
@@ -100,9 +109,55 @@ actor class  Main () {
                   location = info.getLocation();
                   socials = info.getSocials();
                   description = info.getDescription();
+                  subscription =  info.getSubscription();
             };
             return ?record;
           }
         }
-  } 
+  };
+
+
+
+  public shared(msg) func listTask(task : types.TaskRecord) : async types.TaskRecord {
+    // we should eventually check to see if the client is authorized and only then can they post task, will do that later
+    taskCounter += 1;
+    let t = Task.Task(msg.caller,
+     task.price, 
+     task.postedDate, 
+     task.expectedCompletionDate, 
+     task.category, 
+     task.description);
+
+    t.generateId(taskCounter); // generate an id
+     Map.set(listedTask, ihash, taskCounter ,t);
+     return task;
+
+  };
+
+  
+  // function to get all the currently listed tasks
+  public  func getAllListedTasks() : async  List.List<types.TaskRecord> {
+      var tasks : types.Tasks = List.nil<types.TaskRecord>();
+  
+    for (t in Map.vals(listedTask)) {
+            tasks := List.push(t.getTaskRecord(), tasks );
+      };
+      return tasks;
+  };
+
+   // returns all the tasks belonging to the caller
+  public  func getTasksByOwner() : async ?List.List<types.TaskRecord> {
+     return null;
+  };
+
+  public shared(msg) func propose(taskId: Nat) : async Bool{
+      let result = Map.get(listedTask, ihash, taskId);
+      switch(result) {
+        case null false;
+        case (?task) {
+          task.addPromisor(msg.caller);
+          return true;
+        }
+      };
+  };
 };
