@@ -5,19 +5,24 @@ import Principal "mo:base/Principal";
 import Nat "mo:base/Nat";
 import Bool "mo:base/Bool";
 import List "mo:base/List";
+import Float "mo:base/Float";
 import  userInfo "components/UserDetails";
 import  businesInfo "components/BusinessDetails";
 import Task "components/Task";
 
-actor class  Main () {
+
+actor class Main() = self {
+
  let users = Map.new<Principal, userInfo.UserDetails>();
  let businesses = Map.new<Principal,businesInfo.BusinessDetails>();
  // map of (key = id of task, value = Task)
- let listedTask= Map.new<Nat, Task.Task>();
- 
+ let listedTask= Map.new<Nat, Task.Task>(); 
 
  var taskCounter : Nat = 0; // for dev purposes only
- 
+
+ public shared func whoami(): async Principal {
+  return Principal.fromActor(self);
+ };
  // a utility function to check if a user is authorized to access a specific resource
  private func verifyCaller(p : Principal) : async () {
      if (Principal.isAnonymous(p) or (not (await userExists(p)) or (not (await businessExists(p))))) {
@@ -160,4 +165,24 @@ actor class  Main () {
         }
       };
   };
+  
+  // called when a task lister wants to pick someone to complete their task
+  public shared(msg) func acceptProposal(taskId: Nat, microTasker: Principal) : async Bool {
+       return true
+  };
+  
+  public shared(msg) func updateCompletionStatus(taskId: Nat ,status: Float) : async Bool {
+     return true;
+  };
+
+  public shared(msg) func completeTask(taskId : Nat) : async Bool {
+    return true;
+  };
+
+   // called wby a listtasker when work is completed. this is when the funds held by the binder should be sent
+   // to the microstaker who has just completed the task
+  public shared(msg) func verifyWork(taskId: Nat)  :    async Bool {
+      return true;
+  };
+
 };

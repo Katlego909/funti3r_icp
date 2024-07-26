@@ -2,9 +2,11 @@ import {test; suite; expect; } "mo:test/async";
 import List "mo:base/List";
 import backdendCanister "../../funti3r_backend/main";
 import types "../../Types/types";
+// import canister "canister:funti3r_backend";
 
 
 let canister = await backdendCanister.Main();
+
 let userdetails : types.UserDetailsRecord = {
                 name  = "voldi";
                 email = "voldi@gmail.com";

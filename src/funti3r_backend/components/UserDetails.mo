@@ -17,7 +17,7 @@ _description: Text) {
     var qualifications = _qualifications; // list of qualifications
     var socials = _socials; // contains links to the users socials
     var description = _description;
-       var subscription: types.SubscriptionModel = #none;
+    var subscription: types.SubscriptionModel = #none;
     // Getters
     public func getName(): Text { name };
     public func getEmail(): Text { email };
