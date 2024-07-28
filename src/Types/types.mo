@@ -29,7 +29,7 @@ module {
     };
    
    public type TaskRecord = {
-    taskId: Nat;   // for dev purposes only
+    taskId: Nat;   // for dev purposes only (we might need to change the way Id are generated for security purporses)
     owner: Principal;
     price : Float;
     postedDate: Text;
@@ -39,6 +39,14 @@ module {
     completed : Bool;
     promisors : List.List<Principal>; // these are individuals/busniess willing to complete the task
    };
+    
+  public type TaskListed = {
+    id     : Nat;
+    amount : Float;
+    lister : Principal;
+    microTasker : Principal;
+  };
+
 
    public type SubscriptionModel = {
      #none;
