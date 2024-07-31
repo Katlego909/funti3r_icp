@@ -11,6 +11,10 @@ import  businesInfo "components/BusinessDetails";
 import Task "components/Task";
 
 
+//importing canisters
+import ledger "canister:icp_ledger_canister";
+
+
 actor class Main() = self {
 
  let users = Map.new<Principal, userInfo.UserDetails>();
@@ -19,6 +23,8 @@ actor class Main() = self {
  let listedTask= Map.new<Nat, Task.Task>(); 
 
  var taskCounter : Nat = 0; // for dev purposes only
+
+   type TaskId  = Nat;
 
  public shared func whoami(): async Principal {
   return Principal.fromActor(self);
@@ -183,6 +189,29 @@ actor class Main() = self {
    // to the microstaker who has just completed the task
   public shared(msg) func verifyWork(taskId: Nat)  :    async Bool {
       return true;
+  };
+  
+
+//======================================================================================================================================
+  //payment related stuff
+   //called when the task has been completed so that the funds can be released to the micro-tasker
+  public func releaseFundsSuccess(taskId : TaskId): async Bool {
+    return true;
+  };
+   //called when the task has not been completed successfully so that the funds can be released to the task lister
+  public func releaseFundsFail(taskId : TaskId): async Bool {
+    return true;
+  };
+  
+  //used when a principal wants sub_type subscription model
+  public func subscribe(subType: Text, p : Principal) : async Bool {
+     return true;
+  };
+   
+  // gets the balance that the canister is holding
+  public func getBalance() : async  Nat {
+    let   p : Principal = await whoami();
+      await ledger.icrc1_balance_of({owner = p ; subaccount = null})
   };
 
 };

@@ -54,6 +54,10 @@ module {
      #enterprise;
    };
 
-
+   public type payArgs = {
+     amount : Float;
+     taskId : Nat;
+   };
+   
    public type Tasks = List.List<TaskRecord>;
 }

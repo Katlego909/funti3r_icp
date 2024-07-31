@@ -24,6 +24,10 @@ actor class Binder() = self {
       };
   };
 
+  public func getBackendCainsterLedgerAccount(p : Principal) : async Blob {
+    return  Principal.toLedgerAccount( p, null);
+  };
+
    // called when a new task is listed so that the last lister can pay upfront
   public func listTask(task : types.TaskListed) : async Bool {
      // we must transfer icp token from the task lister to the this canister 

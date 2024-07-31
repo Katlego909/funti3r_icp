@@ -9,12 +9,8 @@
       "type": "motoko"
     },
     "funti3r_frontend": {
-      "dependencies": [
-        "funti3r_backend"
-      ],
-      "source": [
-        "src/funti3r_frontend/dist"
-      ],
+      "dependencies": ["funti3r_backend"],
+      "source": ["src/funti3r_frontend/dist"],
       "type": "assets",
       "workspace": "funti3r_frontend"
     },
@@ -28,6 +24,16 @@
       },
       "type": "custom",
       "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz"
+    },
+    "icp_ledger_canister": {
+      "type": "custom",
+      "candid": "https://raw.githubusercontent.com/dfinity/ic/0d2b3965c813cd3a39ceedacd97fa2eee8760074/rs/rosetta-api/icp_ledger/ledger.did",
+      "wasm": "https://download.dfinity.systems/ic/0d2b3965c813cd3a39ceedacd97fa2eee8760074/canisters/ledger-canister.wasm.gz",
+      "remote": {
+        "id": {
+          "ic": "ryjl3-tyaaa-aaaaa-aaaba-cai"
+        }
+      }
     }
   },
   "defaults": {
