@@ -6,23 +6,26 @@ import Nat "mo:base/Nat";
 import Bool "mo:base/Bool";
 import List "mo:base/List";
 import Float "mo:base/Float";
+import Option "mo:base/Option";
+import Nat64 "mo:base/Nat64";
+import Blob "mo:base/Blob";
 import  userInfo "components/UserDetails";
 import  businesInfo "components/BusinessDetails";
 import Task "components/Task";
 
-
 //importing canisters
-import ledger "canister:icp_ledger_canister";
+import  ledger "canister:icp_ledger_canister";
 
 
 actor class Main() = self {
 
  let users = Map.new<Principal, userInfo.UserDetails>();
+ let usersReviews = Map.new<Principal, types.Review>(); // holds reviews for each microstaker
  let businesses = Map.new<Principal,businesInfo.BusinessDetails>();
  // map of (key = id of task, value = Task)
- let listedTask= Map.new<Nat, Task.Task>(); 
-
- var taskCounter : Nat = 0; // for dev purposes only
+ let listedTask= Map.new<Nat, Task.Task>();
+ 
+ var taskCounter : Nat = 0; // for dev purposes only, should be initialsed to some larger number for production
 
    type TaskId  = Nat;
 
@@ -129,7 +132,7 @@ actor class Main() = self {
 
 
 
-  public shared(msg) func listTask(task : types.TaskRecord) : async types.TaskRecord {
+  public shared(msg) func listTask(task : types.TaskRecord, ) : async types.TaskRecord {
     // we should eventually check to see if the client is authorized and only then can they post task, will do that later
     taskCounter += 1;
     let t = Task.Task(msg.caller,
@@ -157,8 +160,14 @@ actor class Main() = self {
   };
 
    // returns all the tasks belonging to the caller
-  public  func getTasksByOwner() : async ?List.List<types.TaskRecord> {
-     return null;
+  public shared(msg) func getTasksByOwner() : async List.List<types.TaskRecord> {
+     var tasks : types.Tasks = List.nil<types.TaskRecord>();
+     for(t in Map.vals(listedTask)) {
+        if(t.getOwner() == msg.caller) {
+              tasks := List.push(t.getTaskRecord(), tasks);
+        };
+     }; 
+     return tasks;
   };
 
   public shared(msg) func propose(taskId: Nat) : async Bool{
@@ -168,35 +177,113 @@ actor class Main() = self {
         case (?task) {
           task.addPromisor(msg.caller);
           return true;
-        }
+        };
       };
   };
   
   // called when a task lister wants to pick someone to complete their task
-  public shared(msg) func acceptProposal(taskId: Nat, microTasker: Principal) : async Bool {
-       return true
+  public shared(msg) func acceptProposal(taskId: Nat, microTasker: Principal) : async (types.Result<Text, Text>){
+       let task =  Map.get(listedTask, ihash, taskId);
+      switch(task) {
+        case null #err("Such a task does not exists");
+        case (?t) {
+           // we need to pick to one of the promisors from the list
+           // prevent other micro-taskers from futher propsing 
+           // remove all the othe proposers
+           return #ok("success");
+        };
+      };
   };
   
-  public shared(msg) func updateCompletionStatus(taskId: Nat ,status: Float) : async Bool {
-     return true;
+
+  // returns the new updated task if the update was a success
+  public shared(msg) func updateCompletionStatus(taskId: Nat ,status: Float) : async types.Result<types.TaskRecord, Text> {
+     let task = Map.get(listedTask, ihash, taskId);
+     if (status < 0) {
+         return #err("invalid status value")
+     };
+     switch(task) {
+      case null #err("such a task does not exists");
+      case (?t) {
+       let record =  t.updateCompletionStatus(status);
+        return #ok(record);
+      }
+     };
   };
 
-  public shared(msg) func completeTask(taskId : Nat) : async Bool {
-    return true;
+  public shared(msg) func completeTask(taskId : Nat) : async types.Result<Text, Text> {
+    // should add more checks to ensure that the caller is indeed the who is suppposed to be calling the method
+    let task = Map.get(listedTask, ihash, taskId);
+    switch(task) {
+      case null #err("could update the status, try again later");
+      case (?v) {
+           v.setCompleted(true);
+           // we must use other real time communication protocols like emails or notifications to notifier the 
+           // task lister so they can verify the work          
+          return #ok("success")
+      };
+    }
+  
   };
 
    // called wby a listtasker when work is completed. this is when the funds held by the binder should be sent
    // to the microstaker who has just completed the task
-  public shared(msg) func verifyWork(taskId: Nat)  :    async Bool {
-      return true;
+  public shared(msg) func verifyWork(taskId: Nat)  :    async  types.Result<Text, Text> {
+    //assuming that the task lister and micro-tasker have communicated and all went well
+       let task = Map.get(listedTask, ihash, taskId);
+       switch(task) {
+        case null #err("No such task");
+        case (?t) {
+          if (t.getOwner() != msg.caller) {
+             return #err("oops, unauthorised access")
+          } else {
+            // we need to release the funds
+            let microTasker : ?Principal = List.get<Principal>(t.getPromisors(), 0); // there should be only one 
+             let isSent =  (await releaseFundsSuccess(t.getTaskRecord(), microTasker));
+             if(isSent) {
+               return #ok("success")
+             } else {
+                return #err("could not transfer funds, try again later")
+             };
+          };
+        }
+       }
+  
   };
   
 
 //======================================================================================================================================
   //payment related stuff
    //called when the task has been completed so that the funds can be released to the micro-tasker
-  public func releaseFundsSuccess(taskId : TaskId): async Bool {
-    return true;
+  public func releaseFundsSuccess(task : types.TaskRecord, microTasker: ?Principal): async Bool {
+          switch(microTasker) {
+             case null return false;
+             case (?principal) {
+              let transferArgs : ledger.TransferArgs = {
+              // can be used to distinguish between transactions
+              memo = Nat64.fromNat(task.taskId);
+              // the amount we want to transfer
+              amount = {e8s = Nat64.fromNat(task.price)};
+              // the ICP ledger charges 10_000 e8s for a transfer
+              fee = { e8s = 10_000 };
+              // we are transferring from the canisters default subaccount, therefore we don't need to specify it
+              from_subaccount = null;
+              // we take the principal and subaccount from the arguments and convert them into an account identifier
+              to = Principal.toLedgerAccount(principal, null);
+              // a timestamp indicating when the transaction was created by the caller; if it is not specified by the caller then this is set to the current ICP time
+              created_at_time = null;
+            };
+              try {
+                let result = await ledger.transfer(transferArgs);
+                 // return true for now
+                 return true;
+              } catch (error : Error) {
+                  return false;
+              };
+             };
+          };
+        
+  
   };
    //called when the task has not been completed successfully so that the funds can be released to the task lister
   public func releaseFundsFail(taskId : TaskId): async Bool {

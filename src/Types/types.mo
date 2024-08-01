@@ -3,8 +3,10 @@ import List "mo:base/List";
 import Principal "mo:base/Principal";
 import Float "mo:base/Float";
 import Nat "mo:base/Nat";
+import Result "mo:base/Result";
 
 module {
+   public type Result<OK, ERR> = Result.Result<OK, ERR>;
 
    public type UserDetailsRecord =  {
          name : Text;
@@ -31,15 +33,24 @@ module {
    public type TaskRecord = {
     taskId: Nat;   // for dev purposes only (we might need to change the way Id are generated for security purporses)
     owner: Principal;
-    price : Float;
+    price : Nat;
     postedDate: Text;
     expectedCompletionDate: Text;
     category: Text;
     description: Text;
     completed : Bool;
+    completionStatus: Float;
     promisors : List.List<Principal>; // these are individuals/busniess willing to complete the task
    };
     
+
+    public type Review = {
+      rate : Float;
+      reviewer: Principal;
+      date : Text;
+      review: Text;
+    };
+
   public type TaskListed = {
     id     : Nat;
     amount : Float;

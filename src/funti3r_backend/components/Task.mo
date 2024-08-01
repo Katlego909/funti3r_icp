@@ -6,7 +6,7 @@ import types "../../Types/types";
 
 module {
 
-   public class Task (_owner: Principal, _price: Float, _postedDate: Text, _expectedCompletionDate: Text, _category: Text, _description: Text) {
+   public class Task (_owner: Principal, _price: Nat, _postedDate: Text, _expectedCompletionDate: Text, _category: Text, _description: Text) = this {
     var owner = _owner;
     var price = _price;
     var postedDate = _postedDate;
@@ -16,10 +16,11 @@ module {
     var completed = false;
     var promisors = List.nil<Principal>(); // these are individuals/businesses willing to complete the task
     var taskId = 0;
+    var completionStatus : Float = 0;
 
     // Getters
     public func getOwner(): Principal { owner };
-    public func getPrice(): Float { price };
+    public func getPrice(): Nat { price };
     public func getPostedDate(): Text { postedDate };
     public func getExpectedCompletionDate(): Text { expectedCompletionDate };
     public func getCategory(): Text { category };
@@ -27,15 +28,23 @@ module {
     public func isCompleted(): Bool { completed };
     public func getPromisors(): List.List<Principal> { promisors };
     public func getTaskId(): Nat {taskId};
+    public func getCompletionStatus(): Float {completionStatus};
     // Setters
     public func setOwner(newOwner: Principal) { owner := newOwner };
-    public func setPrice(newPrice: Float) { price := newPrice };
+    public func setPrice(newPrice: Nat) { price := newPrice };
     public func setPostedDate(newPostedDate: Text) { postedDate := newPostedDate };
     public func setExpectedCompletionDate(newExpectedCompletionDate: Text) { expectedCompletionDate := newExpectedCompletionDate };
     public func setCategory(newCategory: Text) { category := newCategory };
     public func setDescription(newDescription: Text) { description := newDescription };
     public func setCompleted(newCompleted: Bool) { completed := newCompleted };
     public func setPromisors(newPromisors: List.List<Principal>) { promisors := newPromisors };
+
+    //update methods
+
+    public func updateCompletionStatus(status : Float) : types.TaskRecord {
+         completionStatus := status;
+         return getTaskRecord();
+    };
 
 
     public func getTaskRecord() :  types.TaskRecord  {
@@ -49,6 +58,7 @@ module {
             description = getDescription();
             completed = isCompleted();
             promisors = getPromisors(); // these are individuals/busniess willing to complete the task
+            completionStatus = getCompletionStatus();
         };
 
         return r;
