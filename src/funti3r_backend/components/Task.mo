@@ -17,6 +17,8 @@ module {
     var promisors = List.nil<Principal>(); // these are individuals/businesses willing to complete the task
     var taskId = 0;
     var completionStatus : Float = 0;
+    var promisor: ?Principal   =  null; // the person that will be performing the work
+    var inProgress = false;
 
     // Getters
     public func getOwner(): Principal { owner };
@@ -29,6 +31,12 @@ module {
     public func getPromisors(): List.List<Principal> { promisors };
     public func getTaskId(): Nat {taskId};
     public func getCompletionStatus(): Float {completionStatus};
+    public func getPromisor(): ?Principal {
+         return promisor;
+    };
+    public func getInProgress() : Bool {
+      return inProgress;
+    };
     // Setters
     public func setOwner(newOwner: Principal) { owner := newOwner };
     public func setPrice(newPrice: Nat) { price := newPrice };
@@ -38,7 +46,8 @@ module {
     public func setDescription(newDescription: Text) { description := newDescription };
     public func setCompleted(newCompleted: Bool) { completed := newCompleted };
     public func setPromisors(newPromisors: List.List<Principal>) { promisors := newPromisors };
-
+    public func setPromisor(p: Principal) {promisor:= ?p};
+    public func setInProgress() {inProgress := true};
     //update methods
 
     public func updateCompletionStatus(status : Float) : types.TaskRecord {
@@ -59,6 +68,8 @@ module {
             completed = isCompleted();
             promisors = getPromisors(); // these are individuals/busniess willing to complete the task
             completionStatus = getCompletionStatus();
+            inProgress = getInProgress();
+            promisor = getPromisor();
         };
 
         return r;

@@ -22,9 +22,11 @@ actor class Main() = self {
  let users = Map.new<Principal, userInfo.UserDetails>();
  let usersReviews = Map.new<Principal, types.Review>(); // holds reviews for each microstaker
  let businesses = Map.new<Principal,businesInfo.BusinessDetails>();
+
  // map of (key = id of task, value = Task)
  let listedTask= Map.new<Nat, Task.Task>();
- 
+ let completedTasks= Map.new<Nat, Task.Task>(); // keeps track of the completed tasks
+
  var taskCounter : Nat = 0; // for dev purposes only, should be initialsed to some larger number for production
 
    type TaskId  = Nat;
@@ -33,9 +35,11 @@ actor class Main() = self {
   return Principal.fromActor(self);
  };
  // a utility function to check if a user is authorized to access a specific resource
- private func verifyCaller(p : Principal) : async () {
+ private func isAuthorized(p : Principal) : async (Bool) {
      if (Principal.isAnonymous(p) or (not (await userExists(p)) or (not (await businessExists(p))))) {
-       // throw an error if caller is not authorized
+        return  false;
+     } else {
+      return true;
      }
  };
 
@@ -56,7 +60,7 @@ actor class Main() = self {
       return true;
  };
 
- public shared(msg) func creatUserProfile(details: types.UserDetailsRecord): async (?types.UserDetailsRecord) {    
+ public shared(msg) func creatUserProfile(details: types.UserDetailsRecord): async types.Result<Text, Text> {    
       if(not (await userExists(msg.caller))) {
         let user = userInfo.UserDetails(details.name, 
           details.email,
@@ -67,12 +71,12 @@ actor class Main() = self {
           details.description
          );
         Map.set(users, phash, msg.caller, user);
-        return ?details;
+        return #ok("success");
       };
-      return null;
+      return #err("profile already exists for this wallet");
   };
 
- public shared(msg) func creatBusiness(details: types.BusinessDetailsRecord): async (?types.BusinessDetailsRecord) {    
+ public shared(msg) func creatBusiness(details: types.BusinessDetailsRecord): async types.Result<Text, Text> {    
       if(not ( await businessExists(msg.caller))) {
         let info = businesInfo.BusinessDetails(
           details.name,
@@ -83,49 +87,30 @@ actor class Main() = self {
           details.description
         );
         Map.set(businesses, phash, msg.caller, info);
-        return ?details;
+        return #ok("success");
       };
-      return null;
+      return #err("profile already exists for this wallet");
   };
    
   // returns the user's profile if they have a profile otherwise returns null
-  public shared(msg) func loginUser() : async ?types.UserDetailsRecord {
+  public shared(msg) func loginUser() : async types.Result<types.UserDetailsRecord, Text> {
         let result =  Map.get(users, phash, msg.caller);
         switch(result) {
-          case null null; // return null if the usr does not exists
-          case (?value) {
+          case null #err("User does not have an account"); 
+          case (?user) {
             // create the record to return to the client
-            let userDetails : types.UserDetailsRecord = {
-              name =  value.getName();
-              email = value.getEmail();
-              phone = value.getPhone();
-              location = value.getLocation();
-              qualifications = value.getQualifications(); // list of qualifications
-              socials = value.getSocials(); // contains links to the users socials
-              description = value.getDescription();
-              subscription =  value.getSubscription();
-            };
-            return ?userDetails; 
+            return #ok(user.getUserRecord()); 
           }
         }
   };
   
   // returns the user's profile if they have a profile otherwise returns null
-  public shared(msg) func loginB() : async ?types.BusinessDetailsRecord {
+  public shared(msg) func loginB() : async types.Result<types.BusinessDetailsRecord, Text> {
         let result =  Map.get(businesses, phash, msg.caller);
         switch(result) {
-          case null null;
-          case (?info) {
-            let record : types.BusinessDetailsRecord = {
-                  name  = info.getName();
-                  email = info.getEmail();
-                  phone = info.getPhone();
-                  location = info.getLocation();
-                  socials = info.getSocials();
-                  description = info.getDescription();
-                  subscription =  info.getSubscription();
-            };
-            return ?record;
+          case null #err("User does not have an account");
+          case (?business) {
+            return #ok(business.getBusinessRecord());
           }
         }
   };
@@ -159,24 +144,34 @@ actor class Main() = self {
       return tasks;
   };
 
-   // returns all the tasks belonging to the caller
+   // returns all the tasks belonging to the caller both copmleted and not completed
   public shared(msg) func getTasksByOwner() : async List.List<types.TaskRecord> {
      var tasks : types.Tasks = List.nil<types.TaskRecord>();
+     //get all uncomplted tasks
      for(t in Map.vals(listedTask)) {
         if(t.getOwner() == msg.caller) {
               tasks := List.push(t.getTaskRecord(), tasks);
         };
      }; 
+     // get all completed tasks
+     for(t in Map.vals(completedTasks)) {
+           if(t.getOwner() == msg.caller) {
+              tasks := List.push(t.getTaskRecord(), tasks);
+        };
+     };
      return tasks;
   };
 
-  public shared(msg) func propose(taskId: Nat) : async Bool{
+  public shared(msg) func propose(taskId: Nat) : async types.Result<Text, Text>{
       let result = Map.get(listedTask, ihash, taskId);
       switch(result) {
-        case null false;
+        case null #err("no such task");
         case (?task) {
-          task.addPromisor(msg.caller);
-          return true;
+          if(not task.getInProgress()) {
+            task.addPromisor(msg.caller);
+            return #ok("success");
+          };
+          return #err("Sorry, task currently does not take any further proposals");
         };
       };
   };
@@ -186,10 +181,11 @@ actor class Main() = self {
        let task =  Map.get(listedTask, ihash, taskId);
       switch(task) {
         case null #err("Such a task does not exists");
-        case (?t) {
-           // we need to pick to one of the promisors from the list
-           // prevent other micro-taskers from futher propsing 
-           // remove all the othe proposers
+        case (?t) { 
+           t.setInProgress(); // prevents other micro-taskers from propsing further
+           t.setPromisor(microTasker); // sets the person whom will do the job. The person to do the job need not be the one whom propsosed
+           // this allows people to select whomever they want to complete the job.
+           // weway need a way to alert the promisor that they have been selected to do the task using some websocet or other real time protocols
            return #ok("success");
         };
       };
@@ -230,15 +226,19 @@ actor class Main() = self {
    // to the microstaker who has just completed the task
   public shared(msg) func verifyWork(taskId: Nat)  :    async  types.Result<Text, Text> {
     //assuming that the task lister and micro-tasker have communicated and all went well
-       let task = Map.get(listedTask, ihash, taskId);
+       let task =  Map.remove(listedTask, ihash, taskId); // we need to remove it and relocate it to the completed section
        switch(task) {
         case null #err("No such task");
         case (?t) {
           if (t.getOwner() != msg.caller) {
+             Map.set(listedTask, ihash, taskId, t); // put it back if the caller is not allowed to remove
+             // this function will seldom run since it is very unlikely that a random person will have to the task id 
              return #err("oops, unauthorised access")
           } else {
             // we need to release the funds
-            let microTasker : ?Principal = List.get<Principal>(t.getPromisors(), 0); // there should be only one 
+            // move the task to the completed section
+             relocate(t, completedTasks);
+            let microTasker : ?Principal = t.getPromisor(); // get the microstasker
              let isSent =  (await releaseFundsSuccess(t.getTaskRecord(), microTasker));
              if(isSent) {
                return #ok("success")
@@ -249,6 +249,10 @@ actor class Main() = self {
         }
        }
   
+  };
+
+  private func relocate(t: Task.Task, tasks: Map.Map<Nat, Task.Task>) {
+        Map.set(tasks, ihash, t.getTaskId(), t);
   };
   
 
@@ -269,7 +273,7 @@ actor class Main() = self {
               // we are transferring from the canisters default subaccount, therefore we don't need to specify it
               from_subaccount = null;
               // we take the principal and subaccount from the arguments and convert them into an account identifier
-              to = Principal.toLedgerAccount(principal, null);
+              to = Principal.toLedgerAccount(principal, null); // there is no error on this line, motoko is just acting up
               // a timestamp indicating when the transaction was created by the caller; if it is not specified by the caller then this is set to the current ICP time
               created_at_time = null;
             };

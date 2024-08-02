@@ -18,7 +18,7 @@ Then
   npm install
 ```
 
-Run the command to list a list identities
+Run the command to list the current identities
 
 ```bash
 #lists the current identities

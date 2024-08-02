@@ -7,7 +7,7 @@ module {
    _phone: Text, 
    _location: Text, 
    _socials: List.List<Text>, 
-   _description: Text) {
+   _description: Text) = self {
 
     var name = _name;
     var email = _email;
@@ -16,7 +16,7 @@ module {
     var socials = _socials; // contains links to the users socials
     var description = _description;
     var subscription: types.SubscriptionModel = #none;
-
+    var applications: List.List<Nat> = List.nil(); // contains a list of tasks they "applied for"
     // Getters
     public func getName(): Text { name };
     public func getEmail(): Text { email };
@@ -25,7 +25,7 @@ module {
     public func getSocials(): List.List<Text> { socials };
     public func getDescription(): Text { description };
     public func getSubscription(): types.SubscriptionModel { subscription};
-
+    public func getApplications() : List.List<Nat> {applications};
     // Setters
     public func setName(newName: Text) { name := newName };
     public func setEmail(newEmail: Text) { email := newEmail };
@@ -35,7 +35,26 @@ module {
     public func setDescription(newDescription: Text) { description := newDescription };
     public func setSubscription(newSubscription: types.SubscriptionModel) {
         subscription := newSubscription;
-    }
-}
+    };
+      public func setApplication(taskId: Nat) {
+        applications := List.push(taskId, applications);
+    };
+
+    public func getBusinessRecord() : types.BusinessDetailsRecord {
+             let record : types.BusinessDetailsRecord = {
+                  name  = getName();
+                  email = getEmail();
+                  phone = getPhone();
+                  location = getLocation();
+                  socials = getSocials();
+                  description = getDescription();
+                  subscription =  getSubscription();
+                  applications = getApplications();
+            };
+            return record;
+     };
+};
+
+
 
 }

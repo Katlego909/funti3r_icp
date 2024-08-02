@@ -5,6 +5,8 @@ import Float "mo:base/Float";
 import Nat "mo:base/Nat";
 import Result "mo:base/Result";
 
+
+
 module {
    public type Result<OK, ERR> = Result.Result<OK, ERR>;
 
@@ -16,6 +18,7 @@ module {
          qualifications : List.List<Text>; // list of qualifications
          socials: List.List<Text>; // contains links to the users socials
          description: Text;
+         applications: List.List<Nat>; // contains a list of tasks they "applied for"
          subscription: SubscriptionModel;
 
     };
@@ -27,6 +30,7 @@ module {
          location: Text;
          socials: List.List<Text>; // contains links to the users socials
          description: Text;
+         applications: List.List<Nat>; // contains a list of tasks they "applied for"
          subscription: SubscriptionModel;
     };
    
@@ -40,6 +44,8 @@ module {
     description: Text;
     completed : Bool;
     completionStatus: Float;
+    promisor: ?Principal; // the person that will be performing the work
+    inProgress: Bool; // indicates whether a task lister has already chosen or picked someone to complete the task
     promisors : List.List<Principal>; // these are individuals/busniess willing to complete the task
    };
     
