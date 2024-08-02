@@ -21,10 +21,11 @@ Then
 Run the command to list a list identities
 
 ```bash
-  dfx idenitity list
+#lists the current identities
+  dfx identity list
 ```
 
-Make sure that you see at least two namely `anonymous` and `user1`
+Make sure that you see at least users two, namely `anonymous` and `user1`
 
 Otherwise create a new identity by running
 
