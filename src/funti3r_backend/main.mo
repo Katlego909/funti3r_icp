@@ -1,6 +1,6 @@
 import Map "mo:map/Map";
-import types "../Types/types";
 import {phash; ihash} "mo:map/Map";
+import types "../Types/types";
 import Principal "mo:base/Principal";
 import Nat "mo:base/Nat";
 import Bool "mo:base/Bool";
@@ -12,110 +12,60 @@ import Blob "mo:base/Blob";
 import  userInfo "components/UserDetails";
 import  businesInfo "components/BusinessDetails";
 import Task "components/Task";
+import auth "./modules/auth";
 
 //importing canisters
 import  ledger "canister:icp_ledger_canister";
 
 
 actor class Main() = self {
-
+ // all these data should be made stable before production
+ //profile data storages
  let users = Map.new<Principal, userInfo.UserDetails>();
- let usersReviews = Map.new<Principal, types.Review>(); // holds reviews for each microstaker
  let businesses = Map.new<Principal,businesInfo.BusinessDetails>();
 
+ //review data storate
+ let usersReviews = Map.new<Principal, types.Review>(); // holds reviews for each microstaker
+
+ //tasks data storages
  // map of (key = id of task, value = Task)
  let listedTask= Map.new<Nat, Task.Task>();
  let completedTasks= Map.new<Nat, Task.Task>(); // keeps track of the completed tasks
-
  var taskCounter : Nat = 0; // for dev purposes only, should be initialsed to some larger number for production
+ type TaskId  = Nat;
 
-   type TaskId  = Nat;
 
  public shared func whoami(): async Principal {
   return Principal.fromActor(self);
  };
- // a utility function to check if a user is authorized to access a specific resource
- private func isAuthorized(p : Principal) : async (Bool) {
-     if (Principal.isAnonymous(p) or (not (await userExists(p)) or (not (await businessExists(p))))) {
-        return  false;
-     } else {
-      return true;
-     }
- };
 
- private func userExists(p: Principal) : async (Bool) {
-     let hasUser = Map.has(users, phash, p); 
-      if(not hasUser) {
-         return false;
-      };
-      return true;
- };
+//================================================== Auth related functions ==========================================
 
+ public shared(msg) func getProfileType() : async types.Result<Text, Text> {
+   auth.getProfileType(msg.caller, users, businesses);
+};
 
- private func businessExists(p: Principal) : async (Bool) {
-     let hasProfile = Map.has(businesses, phash, p); 
-      if(not hasProfile) {
-        return false;
-      };
-      return true;
- };
-
- public shared(msg) func creatUserProfile(details: types.UserDetailsRecord): async types.Result<Text, Text> {    
-      if(not (await userExists(msg.caller))) {
-        let user = userInfo.UserDetails(details.name, 
-          details.email,
-          details.phone,
-          details.location,
-          details.qualifications,
-          details.socials,
-          details.description
-         );
-        Map.set(users, phash, msg.caller, user);
-        return #ok("success");
-      };
-      return #err("profile already exists for this wallet");
+ public shared(msg) func creatUserProfile(details: types.UserDetailsRecord): async  types.Result<Text, Text> {    
+        auth.creatUserProfile(msg.caller, details, users);
   };
 
- public shared(msg) func creatBusiness(details: types.BusinessDetailsRecord): async types.Result<Text, Text> {    
-      if(not ( await businessExists(msg.caller))) {
-        let info = businesInfo.BusinessDetails(
-          details.name,
-          details.email,
-          details.phone,
-          details.location,
-          details.socials,
-          details.description
-        );
-        Map.set(businesses, phash, msg.caller, info);
-        return #ok("success");
-      };
-      return #err("profile already exists for this wallet");
+ public shared(msg) func createBusiness(details: types.BusinessDetailsRecord): async types.Result<Text, Text> {    
+      auth.createBusiness(msg.caller, details, businesses);
   };
    
   // returns the user's profile if they have a profile otherwise returns null
   public shared(msg) func loginUser() : async types.Result<types.UserDetailsRecord, Text> {
-        let result =  Map.get(users, phash, msg.caller);
-        switch(result) {
-          case null #err("User does not have an account"); 
-          case (?user) {
-            // create the record to return to the client
-            return #ok(user.getUserRecord()); 
-          }
-        }
+         auth.loginUser(msg.caller, users);
   };
   
   // returns the user's profile if they have a profile otherwise returns null
   public shared(msg) func loginB() : async types.Result<types.BusinessDetailsRecord, Text> {
-        let result =  Map.get(businesses, phash, msg.caller);
-        switch(result) {
-          case null #err("User does not have an account");
-          case (?business) {
-            return #ok(business.getBusinessRecord());
-          }
-        }
+          auth.loginB(msg.caller, businesses);
   };
 
+//=================================================== Auth ends here ===================================================================
 
+// ================================================= Tasks related functions ============================================================
 
   public shared(msg) func listTask(task : types.TaskRecord, ) : async types.TaskRecord {
     // we should eventually check to see if the client is authorized and only then can they post task, will do that later
