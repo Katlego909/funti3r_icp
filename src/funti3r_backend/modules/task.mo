@@ -1,6 +1,178 @@
 
+import Principal "mo:base/Principal";
+import List "mo:base/List";
+import Map "mo:map/Map";
+import {ihash} "mo:map/Map";
+import types "../../Types/types";
+import UserDetails "../components/UserDetails";
+import BusinessDetails "../components/BusinessDetails";
+import Task "../components/Task";
+
+
 
 //should contain functions or routines for working with tasks 
 module {
+    public type TaskId =  Nat;
+    public type Users =  Map.Map<Principal, UserDetails.UserDetails>;
+    public type Businesses = Map.Map<Principal, BusinessDetails.BusinessDetails>;
+    public type ListedTasks = Map.Map<TaskId, Task.Task>;
+   
 
+  public func listTask(owner : Principal, task : types.TaskRecord, listedTasks : ListedTasks, generator : () -> Nat ) :  types.TaskRecord {
+    let taskCounter = generator();
+    let t = Task.Task(owner,
+     task.price, 
+     task.postedDate, 
+     task.expectedCompletionDate, 
+     task.category, 
+     task.description);
+    t.generateId(taskCounter); // generate an id
+     Map.set(listedTasks, ihash, taskCounter ,t);
+     return task;
+  };
+
+  
+  // function to get all the currently listed tasks
+  public  func getAllListedTasks(listedTasks : ListedTasks) : List.List<types.TaskRecord> {
+      var tasks : types.Tasks = List.nil<types.TaskRecord>();
+  
+    for (t in Map.vals(listedTasks)) {
+            tasks := List.push(t.getTaskRecord(), tasks );
+      };
+      return tasks;
+  };
+
+   // returns all the tasks belonging to the caller both copmleted and not completed
+  public func getTasksByOwner(owner : Principal , listedTasks : ListedTasks, completedTasks : ListedTasks) :  List.List<types.TaskRecord> {
+     var tasks : types.Tasks = List.nil<types.TaskRecord>();
+     //get all uncomplted tasks
+     for(t in Map.vals(listedTasks)) {
+        if(t.getOwner() ==  owner) {
+              tasks := List.push(t.getTaskRecord(), tasks);
+        };
+     }; 
+     // get all completed tasks
+     for(t in Map.vals(completedTasks)) {
+           if(t.getOwner() == owner) {
+              tasks := List.push(t.getTaskRecord(), tasks);
+        };
+     };
+     return tasks;
+  };
+
+  public func propose(proposer : Principal , taskId: Nat, listedTasks : ListedTasks) :  types.Result<Text, Text>{
+      let result = Map.get(listedTasks, ihash, taskId);
+      switch(result) {
+        case null #err("no such task");
+        case (?task) {
+          if(not task.getInProgress()) {
+            task.addPromisor(proposer); // we should notify the task lister
+            return #ok("success");
+          };
+          return #err("Sorry, task currently does not take any further proposals");
+        };
+      };
+  };
+  
+  // called when a task lister wants to pick someone to complete their task
+  public func acceptProposal(taskOwner : Principal , taskId: Nat, microTasker: Principal, listedTasks : ListedTasks) :  (types.Result<Text, Text>){
+       let task =  Map.get(listedTasks, ihash, taskId);
+      switch(task) {
+        case null #err("Such a task does not exists");
+        case (?t) { 
+            if( not (t.getOwner() == taskOwner)) {
+                return #err("not a valid task owner")
+            };
+
+           t.setInProgress(); // prevents other micro-taskers from propsing further
+           t.setPromisor(microTasker); // sets the person whom will do the job. The person to do the job need not be the one whom propsosed
+           // this allows people to select whomever they want to complete the job.
+           // weway need a way to alert the promisor that they have been selected to do the task using some websocet or other real time protocols
+           return #ok("success");
+        };
+      };
+  };
+  
+
+  // returns the new updated task if the update was a success
+  public  func updateCompletionStatus(p : Principal , taskId: Nat ,status: Float, listedTasks : ListedTasks) :  types.Result<types.TaskRecord, Text> {
+     let task = Map.get(listedTasks, ihash, taskId);
+     if (status < 0) {
+         return #err("invalid status value")
+     };
+     switch(task) {
+      case null #err("such a task does not exists");
+      case (?t) {
+      switch(t.getPromisor()) {
+             case null #err("could not update the status, try again later");
+             case (?promisor) {
+                if( not (promisor == p)) { return #err("could not update status")}; // people should only update status of which they are approved to update
+                  let record =  t.updateCompletionStatus(status);
+                  return #ok(record);
+             };
+          };
+      }
+     };
+  };
+
+  public  func completeTask(p : Principal, taskId : Nat, listedTasks : ListedTasks) :  types.Result<Text, Text> {
+    // should add more checks to ensure that the caller is indeed the who is suppposed to be calling the method
+    let task = Map.get(listedTasks, ihash, taskId);
+    switch(task) {
+      case null #err("could not update the status, try again later");
+      case (?v) {
+          switch(v.getPromisor()) {
+             case null #err("could not update the status, try again later");
+             case (?promisor) {
+                if( not (promisor == p)) { return #err("could not update status")}; // people should only update status of which they are approved to update
+                  v.setCompleted(true);
+           // we must use other real time communication protocols like emails or notifications to notifier the 
+           // task lister so they can verify the work          
+          return #ok("success")
+             };
+          };
+      };
+    }
+  
+  };
+
+   // called wby a listtasker when work is completed. this is when the funds held by the binder should be sent
+   // to the microstaker who has just completed the task
+  public  func verifyWork(taskOwner : Principal, 
+   taskId: Nat, 
+   listedTasks : ListedTasks, 
+   completedTasks : ListedTasks, 
+   releaseFundsSuccess : (types.TaskRecord, ?Principal) -> async Bool,
+   releaseFundsFail    : (types.TaskRecord) -> async Bool 
+   )  : async types.Result<Text, Text> {
+    //assuming that the task lister and micro-tasker have communicated and all went well
+       let task =  Map.remove(listedTasks, ihash, taskId); // we need to remove it and relocate it to the completed section
+       switch(task) {
+        case null #err("No such task");
+        case (?t) {
+          if (t.getOwner() != taskOwner) {
+             Map.set(listedTasks, ihash, taskId, t); // put it back if the caller is not allowed to remove
+             // this function will seldom run since it is very unlikely that a random person will have to the task id 
+             return #err("oops, unauthorised access")
+          } else {
+            // we need to release the funds
+            // move the task to the completed section
+             relocate(t, completedTasks);
+            let microTasker : ?Principal = t.getPromisor(); // get the microstasker
+             let isSent = await releaseFundsSuccess(t.getTaskRecord(), microTasker);
+             if(isSent) {
+               return #ok("success")
+             } else {
+                return #err("could not transfer funds, try again later")
+             };
+          };
+        }
+       }
+  
+  };
+
+  private func relocate(t: Task.Task, tasks: Map.Map<Nat, Task.Task>) {
+        Map.set(tasks, ihash, t.getTaskId(), t);
+  };
+  
 }

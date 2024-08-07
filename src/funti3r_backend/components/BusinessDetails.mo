@@ -9,14 +9,14 @@ module {
    _socials: List.List<Text>, 
    _description: Text) = self {
 
-    var name = _name;
-    var email = _email;
-    var phone = _phone;
-    var location = _location;
-    var socials = _socials; // contains links to the users socials
-    var description = _description;
-    var subscription: types.SubscriptionModel = #none;
-    var applications: List.List<Nat> = List.nil(); // contains a list of tasks they "applied for"
+    private var name = _name;
+    private var email = _email;
+    private var phone = _phone;
+    private var location = _location;
+    private var socials = _socials; // contains links to the users socials
+    private var description = _description;
+    private var subscription: types.SubscriptionModel = #none;
+    private var applications: List.List<Nat> = List.nil(); // contains a list of tasks they "applied for"
     // Getters
     public func getName(): Text { name };
     public func getEmail(): Text { email };

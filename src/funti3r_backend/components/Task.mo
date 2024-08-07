@@ -7,18 +7,18 @@ import types "../../Types/types";
 module {
 
    public class Task (_owner: Principal, _price: Nat, _postedDate: Text, _expectedCompletionDate: Text, _category: Text, _description: Text) = this {
-    var owner = _owner;
-    var price = _price;
-    var postedDate = _postedDate;
-    var expectedCompletionDate = _expectedCompletionDate;
-    var category = _category;
-    var description = _description;
-    var completed = false;
-    var promisors = List.nil<Principal>(); // these are individuals/businesses willing to complete the task
-    var taskId = 0;
-    var completionStatus : Float = 0;
-    var promisor: ?Principal   =  null; // the person that will be performing the work
-    var inProgress = false;
+    private var owner = _owner;
+    private var price = _price;
+    private var postedDate = _postedDate;
+    private var expectedCompletionDate = _expectedCompletionDate;
+    private var category = _category;
+    private var description = _description;
+    private var completed = false;
+    private var promisors = List.nil<Principal>(); // these are individuals/businesses willing to complete the task
+    private var taskId = 0;
+    private var completionStatus : Float = 0;
+    private var promisor: ?Principal   =  null; // the person that will be performing the work
+    private var inProgress = false;
 
     // Getters
     public func getOwner(): Principal { owner };

@@ -1,4 +1,5 @@
 #!/bin/bash
+dfx start --background --clean
 
 dfx identity use anonymous
 export MINTING_ACCOUNT=$(dfx ledger account-id )

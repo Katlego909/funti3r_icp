@@ -52,7 +52,8 @@ module {
     
 
     public type Review = {
-      rate : Float;
+      id     : Nat;
+      rating : Float;
       reviewer: Principal;
       date : Text;
       review: Text;
