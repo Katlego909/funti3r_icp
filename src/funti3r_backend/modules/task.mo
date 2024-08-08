@@ -28,7 +28,7 @@ module {
      task.description);
     t.generateId(taskCounter); // generate an id
      Map.set(listedTasks, ihash, taskCounter ,t);
-     return task;
+     return t.getTaskRecord();
   };
 
   
@@ -106,7 +106,7 @@ module {
       switch(t.getPromisor()) {
              case null #err("could not update the status, try again later");
              case (?promisor) {
-                if( not (promisor == p)) { return #err("could not update status")}; // people should only update status of which they are approved to update
+                if( not (promisor == p)) { return #err("could not update status, you are not assigned to do this task")}; // people should only update status of which they are approved to update
                   let record =  t.updateCompletionStatus(status);
                   return #ok(record);
              };
@@ -119,12 +119,12 @@ module {
     // should add more checks to ensure that the caller is indeed the who is suppposed to be calling the method
     let task = Map.get(listedTasks, ihash, taskId);
     switch(task) {
-      case null #err("could not update the status, try again later");
+      case null #err("such a task does not exists");
       case (?v) {
           switch(v.getPromisor()) {
              case null #err("could not update the status, try again later");
              case (?promisor) {
-                if( not (promisor == p)) { return #err("could not update status")}; // people should only update status of which they are approved to update
+                if( not (promisor == p)) { return #err("could not update status, you are not assigned to do this task")}; // people should only update status of which they are approved to update
                   v.setCompleted(true);
            // we must use other real time communication protocols like emails or notifications to notifier the 
            // task lister so they can verify the work          

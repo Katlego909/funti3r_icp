@@ -12,8 +12,8 @@ import Blob "mo:base/Blob";
 import  userInfo "components/UserDetails";
 import  businesInfo "components/BusinessDetails";
 import Task "components/Task";
-import auth "./modules/auth";
 import taskModule "./modules/task";
+import auth "./modules/auth";
 import reviewModule "./modules/review";
 import ReviewDetails "components/ReviewDetails";
 

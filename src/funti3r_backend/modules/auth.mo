@@ -102,7 +102,7 @@ module auth {
   public func loginB(p: Principal, businesses : Businesses) :  types.Result<types.BusinessDetailsRecord, Text> {
         let result =  Map.get(businesses, phash, p);
         switch(result) {
-          case null #err("Business does not have an account yet");
+          case null #err("Business does not have an account");
           case (?business) {
             return #ok(business.getBusinessRecord());
           }
