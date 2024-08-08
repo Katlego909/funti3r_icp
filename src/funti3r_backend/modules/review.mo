@@ -4,7 +4,7 @@ import List "mo:base/List";
 import Map "mo:map/Map";
 import {phash} "mo:map/Map";
 
-// should contain routines for working with reviews
+
 module {
     type Review = ReviewDetails.ReviewDetails;
     type Reviews = List.List<Review>;
@@ -24,10 +24,8 @@ module {
     };
 };
 
-
 // the caller creating a review for profile p.
 public func createReview(p : Principal, review : types.Review, usersReviews : UsersReviews, idGenerator : () -> Nat ) :  types.Result<Text, Text> {
-  
   let r = Map.get(usersReviews, phash, p );
   switch(r) {
     case null {
@@ -57,7 +55,7 @@ public func createReview(p : Principal, review : types.Review, usersReviews : Us
               };
          };
         
-        if(not updated) {
+        if(not updated) { // if a user has not already laid a review before then we create a new one
          let id = idGenerator();
          let reviewDetails = ReviewDetails.ReviewDetails(id, 
          review.rating, 
@@ -71,7 +69,6 @@ public func createReview(p : Principal, review : types.Review, usersReviews : Us
     };
   }
 };
-
 
  private func mapReviewsToReviewRecords(review : Review) : types.Review {
     return review.getReviewRecord();

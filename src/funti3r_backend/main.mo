@@ -14,7 +14,7 @@ import  businesInfo "components/BusinessDetails";
 import Task "components/Task";
 import auth "./modules/auth";
 import taskModule "./modules/task";
-// import reviewModule "./modules/review";
+import reviewModule "./modules/review";
 import ReviewDetails "components/ReviewDetails";
 
 
@@ -52,7 +52,7 @@ actor class Main() = self {
 
 //================================================== Auth related functions ==========================================
 
- public shared(msg) func getProfileType() : async types.Result<Text, Text> {
+ public  shared(msg)  func getProfileType() : async types.Result<Text, Text> {
    auth.getProfileType(msg.caller, users, businesses);
 };
 
@@ -60,17 +60,17 @@ actor class Main() = self {
         auth.createUserProfile(msg.caller, details, users);
   };
 
- public shared(msg) func createBusiness(details: types.BusinessDetailsRecord): async types.Result<Text, Text> {    
+ public shared(msg) func createBusinessProfile(details: types.BusinessDetailsRecord): async types.Result<Text, Text> {    
       auth.createBusiness(msg.caller, details, businesses);
   };
    
   // returns the user's profile if they have a profile otherwise returns null
-  public shared(msg) func loginUser() : async types.Result<types.UserDetailsRecord, Text> {
+  public shared(msg) func getUserProfile() : async types.Result<types.UserDetailsRecord, Text> {
          auth.loginUser(msg.caller, users);
   };
   
   // returns the user's profile if they have a profile otherwise returns null
-  public shared(msg) func loginB() : async types.Result<types.BusinessDetailsRecord, Text> {
+  public shared(msg) func getBusinessProfile() : async types.Result<types.BusinessDetailsRecord, Text> {
           auth.loginB(msg.caller, businesses);
   };
 
@@ -97,7 +97,6 @@ actor class Main() = self {
     return #err("authentication needed");
   };
 
-  
   // function to get all the currently listed tasks
   public shared(msg) func getAllListedTasks() : async   types.Result<List.List<types.TaskRecord> , Text> {
     if(auth.isAuthorized(msg.caller, users, businesses)) {
@@ -167,15 +166,21 @@ actor class Main() = self {
 
 //=========================================== Reviews ===================================================================================
 
-// public func getReviewByPrincipal(p : Principal) : async types.Result<Reviews, Text> {
-   
-// };
+public shared(msg) func getReviewByPrincipal(p : Principal) : async types.Result<List.List<types.Review>, Text> {
+       if(auth.isAuthorized(msg.caller, users, businesses)) {
+         return reviewModule.getReviewByPrincipal(p, usersReviews);
+    };
+     return #err("authentication needed");
+};
 
 
 // // the caller creating a review for profile p.
-// public func createReview(p : Principal, review : types.Review) : async types.Result<Text, Text> {
-   
-// };
+public shared(msg) func createReview(p : Principal, review : types.Review) : async types.Result<Text, Text> {
+   if(auth.isAuthorized(msg.caller, users, businesses)) {
+        return reviewModule.createReview(p, review, usersReviews, generateReviewId);   
+    };
+     return #err("authentication needed");
+};
 
 //======================================================================================================================================
   //payment related stuff
