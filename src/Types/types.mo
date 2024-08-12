@@ -72,10 +72,22 @@ module {
      #premium;
      #enterprise;
    };
+   
+   public type SubscriptionsPrices = {
+        none : Nat;
+        premium : Nat;
+        enterprise : Nat;
+    };
+
 
    public type payArgs = {
      amount : Float;
      taskId : Nat;
+   };
+
+   public type ICRC_Result<OK, ERR> = {
+    #Err : ERR;
+    #Ok : OK
    };
    
    public type Tasks = List.List<TaskRecord>;

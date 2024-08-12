@@ -9,6 +9,7 @@ import Float "mo:base/Float";
 import Option "mo:base/Option";
 import Nat64 "mo:base/Nat64";
 import Blob "mo:base/Blob";
+import Result "mo:base/Result";
 import  userInfo "components/UserDetails";
 import  businesInfo "components/BusinessDetails";
 import Task "components/Task";
@@ -222,8 +223,8 @@ public shared(msg) func createReview(p : Principal, review : types.Review) : asy
     return true;
   };
   
-  //used when a principal wants sub_type subscription model
-  public func subscribe(subType: Text, p : Principal) : async Bool {
+  //used when a principal wants a subType subscription type
+  public  shared(msg) func subscribe(subType : types.SubscriptionModel) : async  types.Result<Text, Text> {
      return true;
   };
    
