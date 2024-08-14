@@ -17,6 +17,7 @@ import taskModule "./modules/task";
 import auth "./modules/auth";
 import reviewModule "./modules/review";
 import ReviewDetails "components/ReviewDetails";
+import subcriptionModule "./modules/subscription";
 
 
 //importing canisters
@@ -222,16 +223,24 @@ public shared(msg) func createReview(p : Principal, review : types.Review) : asy
   private func releaseFundsFail(task : types.TaskRecord): async  Bool {
     return true;
   };
-  
-  //used when a principal wants a subType subscription type
-  public  shared(msg) func subscribe(subType : types.SubscriptionModel) : async  types.Result<Text, Text> {
-     return true;
-  };
    
   // gets the balance that the canister is holding
   public func getBalance() : async  Nat {
     let   p : Principal = await whoami();
       await ledger.icrc1_balance_of({owner = p ; subaccount = null})
   };
+
+    
+  //used when a principal wants a subType subscription type
+  public  shared(msg) func subscribe(subType : types.SubscriptionModel) : async  types.ICRC_Result<Nat, ledger.TransferFromError> { 
+    let canisterId : Principal =  await whoami();
+     return await subcriptionModule.subscribe(msg.caller, canisterId , subType);
+  };
+
+
+  public func getSubscriptionPrices() : async types.SubscriptionsPrices {
+    return subcriptionModule.getSubscriptionPrices();
+  };
+
 
 };

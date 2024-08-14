@@ -40,17 +40,4 @@ actor class Binder() = self {
      return false;
   };
 
-   //called when the task has been completed so that the funds can be released to the micro-tasker
-  public func releaseFundsSuccess(taskId : TaskId): async Bool {
-    return true;
-  };
-   //called when the task has not been completed successfully so that the funds can be released to the task lister
-  public func releaseFundsFail(taskId : TaskId): async Bool {
-    return true;
-  };
-  
-  //used when a principal wants sub_type subscription model
-  public func subscribe(subType: Text, p : Principal) : async Bool {
-     return true;
-  }
 }
