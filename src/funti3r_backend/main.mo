@@ -230,17 +230,42 @@ public shared(msg) func createReview(p : Principal, review : types.Review) : asy
       await ledger.icrc1_balance_of({owner = p ; subaccount = null})
   };
 
+
+  private func transferFrom(p : Principal, canisterId : Principal, price : Nat) : async Bool  {
+        let transferFromArgs : ledger.TransferFromArgs = {
+        spender_subaccount =  null;
+        from = {owner = p; subaccount = null };
+        to   = {owner = canisterId; subaccount = null};
+        amount = price;
+        fee = null;
+        memo  = null;
+        created_at_time = null; // null for now
+     };
+      let result = await ledger.icrc2_transfer_from(transferFromArgs);
+     
+      switch(result) {
+        case(#Ok(re)) { 
+            return true;
+         };
+        case(#Err(err)) { 
+             return false;
+        };
+      };
+
+  };
     
   //used when a principal wants a subType subscription type
-  public  shared(msg) func subscribe(subType : types.SubscriptionModel) : async  types.ICRC_Result<Nat, ledger.TransferFromError> { 
+  public  shared(msg) func subscribe(subType : types.SubscriptionModel) : async  types.Result<Text, Text> { 
     let canisterId : Principal =  await whoami();
-     return await subcriptionModule.subscribe(msg.caller, canisterId , subType);
+        if(auth.isAuthorized(msg.caller, users, businesses)) {
+           return await subcriptionModule.subscribe(msg.caller, canisterId , subType, users, businesses, transferFrom);
+            };
+          return #err("authentication needed");
   };
 
 
   public func getSubscriptionPrices() : async types.SubscriptionsPrices {
     return subcriptionModule.getSubscriptionPrices();
   };
-
 
 };

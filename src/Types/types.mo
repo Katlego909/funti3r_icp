@@ -84,6 +84,18 @@ module {
      amount : Float;
      taskId : Nat;
    };
+   
+   public type TransferFromError = {
+    BadFee :  { expected_fee : Nat };
+    BadBurn :  { min_burn_amount : Nat };
+    // The [from] account does not hold enough funds for the transfer.
+    InsufficientFunds :  { balance : Nat };
+    // The caller exceeded its allowance.
+    InsufficientAllowance :  { allowance : Nat };
+    CreatedInFuture:  { ledger_time : Nat64 };
+    Duplicate :  { duplicate_of : Nat };
+    GenericError :  { error_code : Nat; message : Text };
+};
 
    public type ICRC_Result<OK, ERR> = {
     #Err : ERR;

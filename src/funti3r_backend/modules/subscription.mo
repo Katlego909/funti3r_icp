@@ -5,7 +5,6 @@ import {phash} "mo:map/Map";
 import Principal "mo:base/Principal";
 import UserDetails "../components/UserDetails";
 import BusinessDetails "../components/BusinessDetails";
-import  ledger "canister:icp_ledger_canister"; 
 import authModule "./auth";
 
 
@@ -19,26 +18,27 @@ module {
         enterprise : Nat = 1000_000_000;
     };
       //used when a principal wants a subType subscription type
-  public func subscribe( p : Principal, canisterId : Principal, subType : types.SubscriptionModel) : async  types.ICRC_Result<Nat, ledger.TransferFromError> {
+  public func subscribe( p : Principal, canisterId : Principal, 
+  subType : types.SubscriptionModel, 
+  users : Users, 
+  businesses : Businesses,
+  transferFrom:  (Principal, Principal, Nat) -> async Bool ) : async  types.Result<Text, Text> {
    
      let price = getSubscriptionPrice(subType);
-     let transferFromArgs : ledger.TransferFromArgs = {
-        spender_subaccount =  null;
-        from = {owner = p; subaccount = null };
-        to   = {owner = canisterId; subaccount = null};
-        amount = price;
-        fee = null;
-        memo  = null;
-        created_at_time = null; // null for now
-     };
-     let result = await ledger.icrc2_transfer_from(transferFromArgs);
+  
+     let result = await transferFrom(p, canisterId, price);
+     if(result) {
+        let _ = updateProfileSubscription(p, subType, users, businesses); // update their profile after a successful transfer of subscription fees
 
-     return result;
+        return #ok("success");
+     } else {
+       return #err("could not subscribe, try again latter");
+     }
   };
 
 
  // after a client has paid for the subscription we next update their profile to reflect this
- public func updateProfileSubscription( p : Principal, subtype  : types.SubscriptionModel , users : Users, businesses : Businesses) : async types.Result<Text, Text> {
+ public func updateProfileSubscription( p : Principal, subtype  : types.SubscriptionModel , users : Users, businesses : Businesses) :  types.Result<Text, Text> {
         if(authModule.userExists(p, users)) {
          let user  = Map.get(users, phash, p);
           switch(user) {
