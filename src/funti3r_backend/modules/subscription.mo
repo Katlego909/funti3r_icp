@@ -67,8 +67,6 @@ module {
            };
    };
   
-
-
   public func getSubscriptionPrices() : types.SubscriptionsPrices {
     return subscriptionsPrices;
   };

@@ -156,9 +156,9 @@ actor class Main() = self {
 
    // called wby a listtasker when work is completed. this is when the funds held by the binder should be sent
    // to the microstaker who has just completed the task
-  public shared(msg) func verifyWork(taskId: Nat)  :    async  types.Result<Text, Text> {
+  public shared(msg) func verifyWork(taskId: Nat, isSuccessfullyCompleted: Bool)  :    async  types.Result<Text, Text> {
     if(auth.isAuthorized(msg.caller, users, businesses)) {
-            let r =  await taskModule.verifyWork(msg.caller,taskId, listedTask, completedTasks, releaseFundsSuccess, releaseFundsFail);
+            let r =  await taskModule.verifyWork(msg.caller,taskId, listedTask, completedTasks, releaseFundsSuccess, releaseFundsFail, isSuccessfullyCompleted);
              return r;
     };
 
@@ -209,7 +209,6 @@ public shared(msg) func createReview(p : Principal, review : types.Review) : asy
 
               try {
                 let result = await ledger.transfer(transferArgs);
-                 // return true for now
                  return true;
               } catch (error : Error) {
                   return false;
@@ -220,8 +219,55 @@ public shared(msg) func createReview(p : Principal, review : types.Review) : asy
   
   };
    //called when the task has not been completed successfully so that the funds can be released to the task lister
-  private func releaseFundsFail(task : types.TaskRecord): async  Bool {
-    return true;
+  private func releaseFundsFail(task : types.TaskRecord, ): async  Bool {
+           switch(task.promisor) {
+             case null return false;
+             case (?microTasker) {
+              let price : Nat = task.price;
+              // return the funds propotionaly based on the amount of work done
+              let ownerAmount = Float.toInt((1 - task.completionStatus) * Float.fromInt(price));
+              let microtTaskerAmount = Float.toInt(task.completionStatus * Float.fromInt(price)); 
+              
+
+              let transferArgsForOnwer : ledger.TransferArgs = {
+              // can be used to distinguish between transactions
+              memo = Nat64.fromNat(task.taskId);
+              // the amount we want to transfer
+              amount = {e8s = Nat64.fromIntWrap (ownerAmount)};
+              // the ICP ledger charges 10_000 e8s for a transfer
+              fee = { e8s = 10_000 };
+              // we are transferring from the canisters default subaccount, therefore we don't need to specify it
+              from_subaccount = null;
+              // we take the principal and subaccount from the arguments and convert them into an account identifier
+              to = Principal.toLedgerAccount(task.owner, null); // there is no error on this line, motoko is just acting up
+              // a timestamp indicating when the transaction was created by the caller; if it is not specified by the caller then this is set to the current ICP time
+              created_at_time = null;
+            };
+
+            
+              let transferArgsForMicroTasker : ledger.TransferArgs = {
+              // can be used to distinguish between transactions
+              memo = Nat64.fromNat(task.taskId);
+              // the amount we want to transfer
+              amount = {e8s = Nat64.fromIntWrap(microtTaskerAmount)};
+              // the ICP ledger charges 10_000 e8s for a transfer
+              fee = { e8s = 10_000 };
+              // we are transferring from the canisters default subaccount, therefore we don't need to specify it
+              from_subaccount = null;
+              // we take the principal and subaccount from the arguments and convert them into an account identifier
+              to = Principal.toLedgerAccount(microTasker, null); // there is no error on this line, motoko is just acting up
+              // a timestamp indicating when the transaction was created by the caller; if it is not specified by the caller then this is set to the current ICP time
+              created_at_time = null;
+            };
+              try {
+                ignore await ledger.transfer(transferArgsForOnwer);
+                ignore  await ledger.transfer(transferArgsForMicroTasker);
+                 return true;
+              } catch (error : Error) {
+                  return false;
+              };
+             };
+          };
   };
    
   // gets the balance that the canister is holding

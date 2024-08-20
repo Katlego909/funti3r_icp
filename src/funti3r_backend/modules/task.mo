@@ -143,7 +143,8 @@ module {
    listedTasks : ListedTasks, 
    completedTasks : ListedTasks, 
    releaseFundsSuccess : (types.TaskRecord, ?Principal) -> async Bool,
-   releaseFundsFail    : (types.TaskRecord) -> async Bool 
+   releaseFundsFail    : (types.TaskRecord) -> async Bool,
+   isSuccessfullyCompleted: Bool
    )  : async types.Result<Text, Text> {
     //assuming that the task lister and micro-tasker have communicated and all went well
        let task =  Map.remove(listedTasks, ihash, taskId); // we need to remove it and relocate it to the completed section
@@ -157,14 +158,25 @@ module {
           } else {
             // we need to release the funds
             // move the task to the completed section
-             relocate(t, completedTasks);
-            let microTasker : ?Principal = t.getPromisor(); // get the microstasker
-             let isSent = await releaseFundsSuccess(t.getTaskRecord(), microTasker);
-             if(isSent) {
-               return #ok("success")
+            if(isSuccessfullyCompleted) {
+              let microTasker : ?Principal = t.getPromisor(); // get the microstasker
+              let isSent = await releaseFundsSuccess(t.getTaskRecord(), microTasker);
+              if(isSent) {
+                relocate(t, completedTasks);
+                return #ok("success")
              } else {
                 return #err("could not transfer funds, try again later")
              };
+
+            } else {
+              let isSent = await releaseFundsFail(t.getTaskRecord());
+                relocate(t, completedTasks);// relocate the task to prevent double spending
+              if(isSent) {
+                return #ok("success")
+             } else {
+                return #err("could not transfer funds to one or both parties, try again later")
+             };
+            }
           };
         }
        }
