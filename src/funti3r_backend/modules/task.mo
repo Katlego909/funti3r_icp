@@ -8,8 +8,6 @@ import UserDetails "../components/UserDetails";
 import BusinessDetails "../components/BusinessDetails";
 import Task "../components/Task";
 
-
-
 //should contain functions or routines for working with tasks 
 module {
     public type TaskId =  Nat;

@@ -191,7 +191,6 @@ public shared(msg) func createReview(p : Principal, review : types.Review) : asy
           switch(microTasker) {
              case null return false;
              case (?principal) {
-
               let transferArgs : ledger.TransferArgs = {
               // can be used to distinguish between transactions
               memo = Nat64.fromNat(task.taskId);
@@ -223,10 +222,11 @@ public shared(msg) func createReview(p : Principal, review : types.Review) : asy
            switch(task.promisor) {
              case null return false;
              case (?microTasker) {
+              let percent = (task.completionStatus/100);
               let price : Nat = task.price;
               // return the funds propotionaly based on the amount of work done
-              let ownerAmount = Float.toInt((1 - task.completionStatus) * Float.fromInt(price));
-              let microtTaskerAmount = Float.toInt(task.completionStatus * Float.fromInt(price)); 
+              let ownerAmount = Float.toInt((1 -  percent) * Float.fromInt(price));
+              let microtTaskerAmount = Float.toInt(percent * Float.fromInt(price)); 
               
 
               let transferArgsForOnwer : ledger.TransferArgs = {
@@ -260,15 +260,32 @@ public shared(msg) func createReview(p : Principal, review : types.Review) : asy
               created_at_time = null;
             };
               try {
-                ignore await ledger.transfer(transferArgsForOnwer);
-                ignore  await ledger.transfer(transferArgsForMicroTasker);
-                 return true;
+                 let r1 =  await ledger.transfer(transferArgsForOnwer);
+                 let r2 =  await ledger.transfer(transferArgsForMicroTasker);
+
+                 var sent : Bool = true;
+                 
+                 // if any of the transfer fails we rent false
+                 switch(r1) {
+                  case (#Err(er)) sent := false;
+                  case (#Ok(k)) {}; // /don't do anything. we might want to log these transactions
+                 };
+                 switch(r2) {
+                  case (#Err(er)) sent := false; 
+                  case (#Ok(k)) {}; // /don't do anything
+                 };
+
+                 return sent;
+
               } catch (error : Error) {
                   return false;
               };
              };
           };
   };
+
+
+
    
   // gets the balance that the canister is holding
   public func getBalance() : async  Nat {
@@ -314,4 +331,6 @@ public shared(msg) func createReview(p : Principal, review : types.Review) : asy
     return subcriptionModule.getSubscriptionPrices();
   };
 
+//============================================================= Testing methods only===================
+ 
 };
