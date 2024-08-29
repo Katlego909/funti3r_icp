@@ -46,6 +46,7 @@ actor class Main() = self {
 
  var taskCounter : TaskId = 0; // for dev purposes only, should be initialsed to some larger number for production
  var reviewId :   ReviewId = 0;
+ var minimumTaskAmount : Nat = 10_00_00_00_00; // 10 icp
 
 
  public shared func whoami(): async Principal {
@@ -89,27 +90,46 @@ actor class Main() = self {
      return reviewId;
   };
 
+  // only busineeses can now list tasks
+  // so we need to add checks in place to ensure that this is rule is followed 
   public shared(msg) func listTask(task : types.TaskRecord, ) : async types.Result<types.TaskRecord, Text> {
-  
     if(auth.isAuthorized(msg.caller, users, businesses)) {
-      let t =  taskModule.listTask(msg.caller,task, listedTask, generateId);
-      return #ok(t);
+      // make sure they first pay before listing the task;
+      // they need to have approved this canister to make payment on thier behalf using icrc2 allowance standard
+      let result = await payForTask(task.price, msg.caller);
+      switch(result) {
+        case (#err(err)) return #err(err); // if the transfer did not go through then we need not list the task on the market place
+        case (#ok(k)) {
+         let t =  taskModule.listTask(msg.caller,task, listedTask, generateId);
+         return #ok(t);
+        }
+      }
     };
 
     return #err("authentication needed");
   };
 
   // function to get all the currently listed tasks
-  public shared(msg) func getAllListedTasks() : async   types.Result<List.List<types.TaskRecord> , Text> {
+  // only microstaksers should call this method
+  // todo:
+      //==> we need to add pagination in the future
+  public shared(msg) func getAllListedTasks() : async   types.Result<types.Tasks , Text> {
     if(auth.isAuthorized(msg.caller, users, businesses)) {
       let tasks =  taskModule.getAllListedTasks(listedTask);
       return #ok(tasks);
     };
       return #err("authentication needed");
   };
+  public shared(msg) func getMicroTaskerApplications() : async   types.Result<types.Tasks , Text> {
+    if(auth.isAuthorized(msg.caller, users, businesses)) {
+      let tasks =  taskModule.getMicroTaskerApplications(msg.caller, users, listedTask, completedTasks);
+      return #ok(tasks);
+    };
+      return #err("authentication needed");
+  };
 
    // returns all the tasks belonging to the caller both copmleted and not completed
-  public shared(msg) func getTasksByOwner() : async  types.Result<List.List<types.TaskRecord> , Text>  {
+  public shared(msg) func getTasksByOwner() : async  types.Result<types.Tasks , Text>  {
          if(auth.isAuthorized(msg.caller, users, businesses)) {
             let tasks =  taskModule.getTasksByOwner(msg.caller,listedTask, completedTasks);
             return #ok(tasks);
@@ -118,9 +138,10 @@ actor class Main() = self {
      return #err("authentication needed");
   };
 
+
   public shared(msg) func propose(taskId: Nat) : async types.Result<Text, Text>{
          if(auth.isAuthorized(msg.caller, users, businesses)) {
-            let  r = taskModule.propose(msg.caller, taskId, listedTask);
+            let  r = taskModule.propose(msg.caller, taskId, listedTask, users);
             return r;
     };
      return #err("authentication needed");
@@ -214,9 +235,26 @@ public shared(msg) func createReview(p : Principal, review : types.Review) : asy
               };
              };
           };
-        
-  
   };
+
+
+private func payForTask(amount : Nat, taskOwner: Principal) : async types.Result<Text,Text> {
+      if(amount < getMinimumTaskAmount()) {
+        return #err("Task amount does not meet the minimum amount required");
+      } else {
+          if(await transferFrom(taskOwner, await whoami(), amount)) {
+              return #ok("success");
+          }  else {
+              return #err("faild to transfer, you did not approve");
+          }
+      }
+};
+
+
+private func getMinimumTaskAmount() : Nat {
+     return minimumTaskAmount;
+};
+
    //called when the task has not been completed successfully so that the funds can be released to the task lister
   private func releaseFundsFail(task : types.TaskRecord, ): async  Bool {
            switch(task.promisor) {
@@ -288,7 +326,7 @@ public shared(msg) func createReview(p : Principal, review : types.Review) : asy
 
    
   // gets the balance that the canister is holding
-  public func getBalance() : async  Nat {
+  private func getBalance() : async  Nat {
     let   p : Principal = await whoami();
       await ledger.icrc1_balance_of({owner = p ; subaccount = null})
   };

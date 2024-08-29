@@ -2,7 +2,7 @@
 import Principal "mo:base/Principal";
 import List "mo:base/List";
 import Map "mo:map/Map";
-import {ihash} "mo:map/Map";
+import {ihash;phash} "mo:map/Map";
 import types "../../Types/types";
 import UserDetails "../components/UserDetails";
 import BusinessDetails "../components/BusinessDetails";
@@ -58,20 +58,63 @@ module {
      return tasks;
   };
 
-  public func propose(proposer : Principal , taskId: Nat, listedTasks : ListedTasks) :  types.Result<Text, Text>{
+  public func propose(proposer : Principal , taskId: Nat, listedTasks : ListedTasks, microTaskers : Users) :  types.Result<Text, Text>{
+      
       let result = Map.get(listedTasks, ihash, taskId);
       switch(result) {
         case null #err("no such task");
         case (?task) {
           if(not task.getInProgress()) {
             task.addPromisor(proposer); // we should notify the task lister
+            //upate microtaskter application details
+            updateMicrotaskerDetails(proposer, microTaskers, taskId);
             return #ok("success");
           };
           return #err("Sorry, task currently does not take any further proposals");
         };
       };
   };
+
+  private func  updateMicrotaskerDetails(proposer : Principal, microTaskers : Users, taskId : Nat) {
+      let result = Map.get(microTaskers, phash, proposer);
+      switch(result) {
+        case null return; // this can never be the case since the auth module will gurantee that the person calling this method is already authenticated
+        case (?user) {
+           user.setApplication(taskId);
+        };
+      }
+  };
   
+
+  // it should return a list of all the tasks this microTasker has ever applied to
+  public func getMicroTaskerApplications(microTasker: Principal, microTaskers: Users,  listedTasks : ListedTasks, completedTasks : ListedTasks ) :  List.List<types.TaskRecord>{
+    var tasks : types.Tasks = List.nil<types.TaskRecord>();
+    let user = Map.get(microTaskers, phash, microTasker);
+     switch(user) {
+      case (null) return tasks;
+      case (?tasker) {
+        let applications = tasker.getApplications(); // get all the ids of the tasks they have ever applied for
+        for(t in List.toIter<Nat>(applications)) {
+         tasks := loadTaskIntoList(t,tasks, listedTasks);
+         tasks :=  loadTaskIntoList(t,tasks, completedTasks);
+        };
+
+        return tasks;
+      };
+     }
+  };
+
+
+  private func loadTaskIntoList(taskId : Nat, list : types.Tasks, lists : ListedTasks) : types.Tasks {
+       let r = Map.get(lists, ihash, taskId);
+       switch(r) {
+        case (null) return list; // return the old list
+         case (?task) {
+           let r =  List.push<types.TaskRecord>(task.getTaskRecord(), list);
+           return r; // return the updated list
+        };
+       }
+  };
   // called when a task lister wants to pick someone to complete their task
   public func acceptProposal(taskOwner : Principal , taskId: Nat, microTasker: Principal, listedTasks : ListedTasks) :  (types.Result<Text, Text>){
        let task =  Map.get(listedTasks, ihash, taskId);

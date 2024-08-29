@@ -7,11 +7,15 @@ import List "mo:base/List";
 import Result "mo:base/Result";
 import Task "../../funti3r_backend/components/Task";
 import taskModule "../../funti3r_backend/modules/task";
+import  userInfo "../../funti3r_backend/components/UserDetails";
 
+// todo => load create two new user profiles and laode them into users's map
 type TaskId = Nat;
 // test data
 let principal = Principal.fromText("un4fu-tqaaa-aaaab-qadjq-cai"); // testing purposes only
 let principal2 = Principal.fromText("bd3sg-teaaa-aaaaa-qaaba-cai");
+ let users = Map.new<Principal, userInfo.UserDetails>();
+
 
 //tasks data storages
  // map of (key = id of task, value = Task)
@@ -65,7 +69,7 @@ let taskRecord : types.TaskRecord = {
      } );
 
      await test("propose to do a task", func () : async () {
-        let r = taskModule.propose(principal2, 1, listedTask);
+        let r = taskModule.propose(principal2, 1, listedTask, users);
         assert r == #ok("success");
      } );
 
