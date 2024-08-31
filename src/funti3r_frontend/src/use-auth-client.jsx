@@ -114,7 +114,7 @@ export const useAuthClient = (options = defaultOptions) => {
           const identity = authClient.getIdentity()
 
           // console.log("auth principal"+ principalID)
-          console.log("Prosper " + identity)
+          console.log("identity " + identity)
           if (identity) {
             setIdentity(identity);
             setPrincipal(principalID)
