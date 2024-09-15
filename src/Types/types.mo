@@ -4,8 +4,10 @@ import Principal "mo:base/Principal";
 import Float "mo:base/Float";
 import Nat "mo:base/Nat";
 import Result "mo:base/Result";
-
-
+import Bool "mo:base/Bool";
+import Course "../course_manager/course";
+import courseModule "../course_manager/courseModule";
+// import Map "mo:map/Map";
 
 
 module {
@@ -103,4 +105,9 @@ module {
    };
    
    public type Tasks = List.List<TaskRecord>;
+
+// course related types
+   public type Courses = List.List<Course.Course>; // it will contain the list of course actors
+   public type CourseModules = List.List<courseModule.CourseModule>;
+   
 }

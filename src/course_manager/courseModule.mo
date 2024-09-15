@@ -1,0 +1,5 @@
+
+
+actor class CourseModule() {
+
+}
