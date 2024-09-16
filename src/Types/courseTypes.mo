@@ -3,6 +3,7 @@ import Map "mo:map/Map";
 import List "mo:base/List";
 import Result "mo:base/Result";
 import Principal "mo:base/Principal";
+import Bool "mo:base/Bool";
 
 
 
@@ -12,9 +13,15 @@ module {
    public type CourseProfile = { // this profile will belong to an individual person that has enrolled for a course
      enrollmentDate : Text;
      courseCompleted : Bool;
-     modulesCompleted : Nat;
+     modulesCompleted :   Map.Map<Nat, Bool>;
      lastAccessedCourse : Text;
      coursePrice        : Float; // the amount they paid for the course
+   };
+
+   public type CourseProfileQuest = { // this profile will belong to an individual person that has enrolled for a course
+     enrollmentDate : Text;
+     courseCompleted : Bool;
+     modulesCompleted :   List.List<Nat>;
    };
 
    public type ModulePair = {
@@ -28,7 +35,6 @@ module {
     courseName: Text;
     category  : Text;
     lastUpated : Text; 
-    price       : Float;
     totalModules : Nat;
     modules : List.List<ModulePair>;
    };

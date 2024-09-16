@@ -4,16 +4,17 @@ import Map "mo:map/Map";
 import courseTypes "../Types/courseTypes";
 import CourseModule "courseModule";
 import Cycles "mo:base/ExperimentalCycles";
-import {phash} "mo:map/Map";
+import {phash; ihash} "mo:map/Map";
+import CourseTypes "../Types/courseTypes";
 
 
 actor class Course(p : Principal) = self {
-     type CoursePair = {
+    private type CoursePair = {
          moduleActor : CourseModule.CourseModule;
          moduleHeading : Text;
      };
 
-     type CoursePairMap = Map.Map<Principal, CoursePair>;
+    private type CoursePairMap = Map.Map<Principal, CoursePair>;
 
      var manager : Principal = p;
      var enrolled : courseTypes.Enrolled = Map.new<Principal, courseTypes.CourseProfile>(); 
@@ -21,7 +22,7 @@ actor class Course(p : Principal) = self {
      var courseInformation : ?courseTypes.CourseInformation = null;
      var totalModules = 0;
      var moduleDefaultCycles = 1_000_000_000_000;
-
+     
     private func isEnrolled(p : Principal) : Bool {
       return Map.has(enrolled, phash, p);
     };
@@ -53,16 +54,23 @@ actor class Course(p : Principal) = self {
 
 
 
-    public shared func getCourseDetails() : async ?courseTypes.CourseDetails  {
-      return null;
+    public shared query(msg) func getCourseDetails() : async courseTypes.Result<?courseTypes.CourseDetails, Text>  {
+      if(not isEnrolled(msg.caller)) {
+         return #err("not enrolled");
+      }  else if(courseInformation == null) {
+            return #err("no content, yet");
+      } else {
+           let details = getDetails();
+           return #ok(details);
+      };
     };
 
-    public shared(msg) func createModule(moduleName : Text) : async courseTypes.Result<courseTypes.ModulePair, Text> {
+    public shared(msg) func createModule(moduleName : Text, moduleNumber : Nat) : async courseTypes.Result<courseTypes.ModulePair, Text> {
        if(not isValidCaller(msg.caller)) {
         return #err("error")
        } else {
          Cycles.add<system>(moduleDefaultCycles);
-         let m  = await CourseModule.CourseModule(moduleName);
+         let m  = await CourseModule.CourseModule(moduleName, moduleNumber);
           
          let coursePair : CoursePair = {
             moduleActor  =  m;
@@ -80,6 +88,45 @@ actor class Course(p : Principal) = self {
        };
     };
 
+
+    public func updateModuleStatus(person : Principal, moduleNumberCompleted : Nat) : async Bool {
+         if(not isEnrolled(person)) {
+          return false;
+         };
+         switch(Map.get(enrolled, phash, person)) {
+          case null {};
+          case (?profile) {
+               let completed = profile.modulesCompleted;
+               Map.set(completed,ihash,moduleNumberCompleted, true); // since completed is a reference to the map, we need not reasign it to the profile
+               //todo => check if all the modules have been completed and update their profile so a certificate can be issued out
+          };
+         };
+         return true;
+    };
+
+
+    public  shared query(msg) func getCourseProfile() : async courseTypes.Result<?CourseTypes.CourseProfileQuest, Text> {
+         if(not isEnrolled(msg.caller)) {
+            return #err("not enrolled for this course");
+         } else {
+          switch(Map.get(enrolled, phash, msg.caller)) {
+               case null return #ok(null);
+               case (?profile) {
+                 var completedModules = List.nil<Nat>();
+                 let m = profile.modulesCompleted;
+                  for(t in m.keys()) {
+                     completedModules := List.push(t,completedModules);
+                  };
+                  let c : CourseTypes.CourseProfileQuest = {
+                        enrollmentDate =  profile.enrollmentDate;
+                        courseCompleted  =  profile.courseCompleted;
+                        modulesCompleted  = completedModules;
+                  };
+                  return #ok(?c);
+               };
+          };
+         };
+    };
   // cycles related
   public func getCourseManagerCurrentCycles() : async Nat {
     return Cycles.balance();
@@ -89,7 +136,39 @@ actor class Course(p : Principal) = self {
     //todo
     //  loop through 
     return true;
-   }
+   };
 
+
+// utility function
+
+private func getDetails() : ?courseTypes.CourseDetails {
+
+    var modules = List.nil<courseTypes.ModulePair>();
+           List.iterate(courseModules, func (pairMap : CoursePairMap) {
+              for(pair in Map.vals(pairMap)) { // there is only one value in this map, so loop will run once
+                    let modulePair : courseTypes.ModulePair  = {
+                       modulePrincipal = Principal.fromActor(pair.moduleActor);
+                       title = pair.moduleHeading;
+                    };
+                    modules := List.push(modulePair, modules);
+              };
+           });
+
+           switch(courseInformation) {
+            case null {return null};
+            case (?inf) {
+              let details : courseTypes.CourseDetails = {
+             courseName  = inf.courseName;
+              category   = inf.category;
+              lastUpated = inf.lastUpated;
+              totalModules = totalModules;
+              modules    = modules;
+           };
+            return ?details;
+            };
+           }
+    
+ 
+};
 
 }

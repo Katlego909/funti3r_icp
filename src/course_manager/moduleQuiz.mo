@@ -2,10 +2,15 @@ import Map "mo:map/Map";
 import quizTypes "../Types/quizTypes";
 import {ihash} "mo:map/Map";
 import List "mo:base/List";
+import Principal "mo:base/Principal";
+import Float "mo:base/Float";
 
-actor class ModuleQuiz() {
+
+actor class ModuleQuiz(n : Nat) {
+    var moduleNumber : Nat = n;
     var questions = Map.new<Nat, quizTypes.Question>();
     stable var id : quizTypes.QuestionId = 0;
+    stable var PASS_MARK : Float = 60.0;
 
     public query func sayQuiz() : async Text {
         return "Hello, want to take a quiz ? (:";
@@ -59,7 +64,8 @@ public query func getQuestions() : async  List.List<quizTypes.Question> {
        return adminQuestions;
 };
 
-public query func verifyAnswers(answers : [quizTypes.Answer]) : async Nat {
+// pass in the right courseId associated with this module
+public shared(msg)  func verifyAnswers(answers : [quizTypes.Answer], coursePrincipal : Principal) : async Float {
     var correctCount : Nat = 0;
     if(answers.size() == 0) {
       return 0;
@@ -74,8 +80,12 @@ public query func verifyAnswers(answers : [quizTypes.Answer]) : async Nat {
         };
        }  
     };
-
-    return  (correctCount / answers.size());
+     let result  = (Float.fromInt(correctCount) / Float.fromInt(answers.size())) * 100;
+    if(result >= PASS_MARK) {
+      let course = actor(Principal.toText(coursePrincipal)) : actor {updateModuleStatus : (Principal, Nat) -> async Bool};
+      let r = await course.updateModuleStatus(msg.caller, moduleNumber);
+    };
+    return  result;
 };
 
 

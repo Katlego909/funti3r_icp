@@ -1,7 +1,6 @@
 import List "mo:base/List";
 
 module {
-  
 public  type QuestionId = Nat;
 public type Choice = {
   id: Nat;

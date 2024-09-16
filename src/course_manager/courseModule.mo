@@ -5,18 +5,26 @@ import Principal "mo:base/Principal";
 import ModuleQuiz "moduleQuiz";
 
 
-actor class CourseModule(name : Text) {
+actor class CourseModule(name : Text, n : Nat) {
   type Video = CourseVideo.CourseVideo;
-
+  type ModuleInfo = {
+   moduleName : Text;
+   moduleNumber : Nat;
+  };
    stable let DEFAULT_UNIT_CYCLES = 5_000_000_000_000;
    stable var quizActor : ?ModuleQuiz.ModuleQuiz = null;
 
 
-   var  moudleName : Text = name;
+   var  moduleName : Text = name;
+   var moduleNumber : Nat = n;
+
    stable var moduleUnits = List.nil<Video>();
    
-   public query func getCourseModuleName() : async Text {
-       return moudleName;
+   public query func getCourseModulInfo() : async ModuleInfo {
+       return {
+         moduleName;
+         moduleNumber;
+       };
    };
 
 
@@ -34,7 +42,7 @@ actor class CourseModule(name : Text) {
      switch(quizActor) {
         case (null) {
            Cycles.add<system>(DEFAULT_UNIT_CYCLES);
-          let quiz = await ModuleQuiz.ModuleQuiz();
+          let quiz = await ModuleQuiz.ModuleQuiz(moduleNumber);
            quizActor := ?quiz;
           return Principal.fromActor(quiz);
         };
