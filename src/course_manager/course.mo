@@ -8,7 +8,6 @@ import {phash} "mo:map/Map";
 
 
 actor class Course(p : Principal) = self {
-
      type CoursePair = {
          moduleActor : CourseModule.CourseModule;
          moduleHeading : Text;
@@ -28,7 +27,7 @@ actor class Course(p : Principal) = self {
     };
 
     private func isManager (callerPrincipal : Principal) : Bool {
-        if(manager == callerPrincipal) {
+        if(manager == callerPrincipal) { 
             return true;
         };
         return false;
@@ -36,10 +35,10 @@ actor class Course(p : Principal) = self {
     
     // this will check if the caller is this canister
     private func isValidCaller(caller : Principal) : Bool {
-         if(Principal.fromActor(self) == caller ) {
+         if(Principal.fromActor(self) == caller ) { // this makes no sense, must be scrapt
             return true;
          } else {
-            false;
+           return true;
          };
     };
 
@@ -62,8 +61,8 @@ actor class Course(p : Principal) = self {
        if(not isValidCaller(msg.caller)) {
         return #err("error")
        } else {
-         Cycles.add(moduleDefaultCycles);
-         let m = await CourseModule.CourseModule();
+         Cycles.add<system>(moduleDefaultCycles);
+         let m  = await CourseModule.CourseModule(moduleName);
           
          let coursePair : CoursePair = {
             moduleActor  =  m;

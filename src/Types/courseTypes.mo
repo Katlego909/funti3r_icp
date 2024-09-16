@@ -43,4 +43,18 @@ module {
    public type Enrolled =  Map.Map<Principal, CourseProfile>;
 
 
+ public type FileInfo = {
+  id: Text;
+  fileName: Text;
+  size : Nat;
+  mimeType : Text;
+  chunkCount: Nat;
+  allChunksUploaded: Bool;
+ };
+
+ public type UnitDetails = {
+   name : Text;
+   number: Nat;
+ };
+
 }

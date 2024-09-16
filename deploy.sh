@@ -46,6 +46,7 @@ dfx deploy --specified-id ryjl3-tyaaa-aaaaa-aaaba-cai icp_ledger_canister   --ar
 #FUNTI3R CANISTERS STARTS HERE
 dfx deploy funti3r_frontend
 dfx deploy funti3r_backend
+dfx deploy funti3r_course
 
 
 dfx identity use user1

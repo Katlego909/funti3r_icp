@@ -1,0 +1,1 @@
+dfx ledger fabricate-cycles  --cycles 1000_000_000_000_000_000 --canister funti3r_course
