@@ -4,9 +4,11 @@ import Map "mo:map/Map";
 import courseTypes "../Types/courseTypes";
 import CourseModule "courseModule";
 import Cycles "mo:base/ExperimentalCycles";
-import {phash; ihash} "mo:map/Map";
 import CourseTypes "../Types/courseTypes";
+import Prim "mo:prim";
+import Nat64 "mo:base/Nat64";
 
+import {phash; ihash} "mo:map/Map";
 
 actor class Course(p : Principal) = self {
     private type CoursePair = {
@@ -31,7 +33,7 @@ actor class Course(p : Principal) = self {
         if(manager == callerPrincipal) { 
             return true;
         };
-        return false;
+        return true; // for tesing purposes must change this once the course manager has been determined
     };
     
     // this will check if the caller is this canister
@@ -128,21 +130,13 @@ actor class Course(p : Principal) = self {
          };
     };
   // cycles related
-  public func getCourseManagerCurrentCycles() : async Nat {
+  public func getCurrentCycles() : async Nat {
     return Cycles.balance();
  };
 
-   public func recieveCycles(coursePrincipal : Principal) : async Bool {
-    //todo
-    //  loop through 
-    return true;
-   };
-
 
 // utility function
-
 private func getDetails() : ?courseTypes.CourseDetails {
-
     var modules = List.nil<courseTypes.ModulePair>();
            List.iterate(courseModules, func (pairMap : CoursePairMap) {
               for(pair in Map.vals(pairMap)) { // there is only one value in this map, so loop will run once
@@ -170,5 +164,25 @@ private func getDetails() : ?courseTypes.CourseDetails {
     
  
 };
+
+
+// enrollment
+ // called when micro-tasker wants to enroll in a course
+ // todo => they must pay first
+ //  the payments processing must happen on the backend for security
+ public shared(msg) func enroll() : async Bool {
+   return true;
+ };
+
+
+
+ 
+   public shared func getCurrentHeapMemory():  async Nat64 {
+        Nat64.fromNat(Prim.rts_heap_size());
+    };
+
+    public shared func getCurrentMemory(): async Nat64 {
+        Nat64.fromNat(Prim.rts_memory_size());
+    };
 
 }

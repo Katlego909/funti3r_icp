@@ -3,6 +3,9 @@ import List "mo:base/List";
 import Cycles "mo:base/ExperimentalCycles";
 import Principal "mo:base/Principal";
 import ModuleQuiz "moduleQuiz";
+import Prim "mo:prim";
+import Nat64 "mo:base/Nat64";
+
 
 
 actor class CourseModule(name : Text, n : Nat) {
@@ -13,7 +16,6 @@ actor class CourseModule(name : Text, n : Nat) {
   };
    stable let DEFAULT_UNIT_CYCLES = 5_000_000_000_000;
    stable var quizActor : ?ModuleQuiz.ModuleQuiz = null;
-
 
    var  moduleName : Text = name;
    var moduleNumber : Nat = n;
@@ -50,7 +52,22 @@ actor class CourseModule(name : Text, n : Nat) {
      }
    };
 
-   public query func getModuleVideos() : async List.List<Video> {
+   public query func getModuleUnits() : async List.List<Video> {
     return moduleUnits;
    };
+
+
+     // cycles related
+  public func getCurrentCycles() : async Nat {
+    return Cycles.balance();
+ };
+
+ 
+   public shared func getCurrentHeapMemory():  async Nat64 {
+        Nat64.fromNat(Prim.rts_heap_size());
+    };
+
+    public shared func getCurrentMemory(): async Nat64 {
+        Nat64.fromNat(Prim.rts_memory_size());
+    };
 }

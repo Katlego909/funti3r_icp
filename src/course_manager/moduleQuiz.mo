@@ -4,7 +4,9 @@ import {ihash} "mo:map/Map";
 import List "mo:base/List";
 import Principal "mo:base/Principal";
 import Float "mo:base/Float";
-
+import Cycles "mo:base/ExperimentalCycles";
+import Nat64 "mo:base/Nat64";
+import Prim "mo:prim";
 
 actor class ModuleQuiz(n : Nat) {
     var moduleNumber : Nat = n;
@@ -15,7 +17,6 @@ actor class ModuleQuiz(n : Nat) {
     public query func sayQuiz() : async Text {
         return "Hello, want to take a quiz ? (:";
     };
-    
     public shared(msg) func setQuestion(q : quizTypes.Question) : async Bool {
          // must add measures to ensure that only authorized people are allowed to call this method
         //if id = 0 then we assume this question is a brand  new question
@@ -87,5 +88,19 @@ public shared(msg)  func verifyAnswers(answers : [quizTypes.Answer], coursePrinc
     return  result;
 };
 
+   // cycles related
+  public func getCurrentCycles() : async Nat {
+    return Cycles.balance();
+ };
+
+
+ 
+   public shared func getCurrentHeapMemory():  async Nat64 {
+        Nat64.fromNat(Prim.rts_heap_size());
+    };
+
+    public shared func getCurrentMemory(): async Nat64 {
+        Nat64.fromNat(Prim.rts_memory_size());
+    };
 
 }

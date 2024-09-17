@@ -1,6 +1,9 @@
 import courseTypes "../Types/courseTypes";
 import Map "mo:map/Map";
 import {ihash} "mo:map/Map";
+import Cycles "mo:base/ExperimentalCycles";
+import Prim "mo:prim";
+import Nat64 "mo:base/Nat64";
 
 actor class CourseVideo(unitName : Text, unitNumber : Nat) {
 
@@ -57,4 +60,20 @@ actor class CourseVideo(unitName : Text, unitNumber : Nat) {
         Map.set(videoBanner, ihash, chunkId, chunk);
        return true;
     };
+
+      // cycles related
+  public func getCurrentCycles() : async Nat {
+    return Cycles.balance();
+ };
+
+
+ 
+   public shared func getCurrentHeapMemory():  async Nat64 {
+        Nat64.fromNat(Prim.rts_heap_size());
+    };
+
+    public shared func getCurrentMemory(): async Nat64 {
+        Nat64.fromNat(Prim.rts_memory_size());
+    };
+
 }

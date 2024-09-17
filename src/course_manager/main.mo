@@ -4,7 +4,8 @@ import types "../Types/types";
 import Cycles "mo:base/ExperimentalCycles";
 import Bool "mo:base/Bool";
 import Course "course";
-
+import Prim "mo:prim";
+import Nat64 "mo:base/Nat64";
 
 actor Manager {
     var courses : types.Courses = List.nil<Course.Course>();
@@ -16,10 +17,6 @@ actor Manager {
         return Principal.fromActor(course);
     };
     
-   // method to view cycles information about the manager canister
-   public func getCourseManagerCurrentCycles() : async Nat {
-    return Cycles.balance();
-   };
 
    public query func getCourses() : async List.List<Course.Course> {
     return courses;
@@ -29,7 +26,22 @@ actor Manager {
     //todo
     // find a course with the principal that matches the one passed to it and top it with cycles
     return true;
-   }
+   };
+
+     // cycles related
+  public func getCurrentCycles() : async Nat {
+    return Cycles.balance();
+ };
+
+
+ 
+   public shared func getCurrentHeapMemory():  async Nat64 {
+        Nat64.fromNat(Prim.rts_heap_size());
+    };
+
+    public shared func getCurrentMemory(): async Nat64 {
+        Nat64.fromNat(Prim.rts_memory_size());
+    };
 
 
 }
