@@ -60,7 +60,6 @@ public query func getQuestions() : async  List.List<quizTypes.Question> {
         for(q in Map.vals(questions)) {
             adminQuestions := List.push(q, adminQuestions);
         };
-
        return adminQuestions;
 };
 

@@ -267,8 +267,6 @@ private func getMinimumTaskAmount() : Nat {
               // return the funds propotionaly based on the amount of work done
               let ownerAmount = Float.toInt((1 -  percent) * Float.fromInt(price));
               let microtTaskerAmount = Float.toInt(percent * Float.fromInt(price)); 
-              
-
               let transferArgsForOnwer : ledger.TransferArgs = {
               // can be used to distinguish between transactions
               memo = Nat64.fromNat(task.taskId);
