@@ -14,7 +14,7 @@ actor class CourseModule(name : Text, n : Nat) {
    moduleName : Text;
    moduleNumber : Nat;
   };
-   stable let DEFAULT_UNIT_CYCLES = 5_000_000_000_000;
+   stable let DEFAULT_UNIT_CYCLES = 1_000_000_000_000_000;
    stable var quizActor : ?ModuleQuiz.ModuleQuiz = null;
 
    var  moduleName : Text = name;

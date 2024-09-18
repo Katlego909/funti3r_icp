@@ -23,7 +23,7 @@ actor class Course(p : Principal) = self {
      var courseModules  = List.nil<CoursePairMap>();
      var courseInformation : ?courseTypes.CourseInformation = null;
      var totalModules = 0;
-     var moduleDefaultCycles = 1_000_000_000_000;
+     var moduleDefaultCycles = 5_000_000_000_000_000;
      
     private func isEnrolled(p : Principal) : Bool {
       return Map.has(enrolled, phash, p);

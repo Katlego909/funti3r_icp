@@ -9,7 +9,7 @@ import Nat64 "mo:base/Nat64";
 
 actor Manager {
     var courses : types.Courses = List.nil<Course.Course>();
-    let COURSE_CYCLES = 20_000_000_000_000;
+    let COURSE_CYCLES = 10_000_000_000_000_000;
     public shared func createCourse() : async Principal {
         Cycles.add<system>(COURSE_CYCLES);
         let course = await Course.Course(Principal.fromActor(Manager));

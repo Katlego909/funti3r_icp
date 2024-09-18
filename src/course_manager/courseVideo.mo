@@ -4,8 +4,9 @@ import {ihash} "mo:map/Map";
 import Cycles "mo:base/ExperimentalCycles";
 import Prim "mo:prim";
 import Nat64 "mo:base/Nat64";
+import Principal "mo:base/Principal";
 
-actor class CourseVideo(unitName : Text, unitNumber : Nat) {
+actor class CourseVideo(unitName : Text, unitNumber : Nat) = self {
 
     var name = unitName;
     var number = unitNumber;
@@ -25,9 +26,16 @@ actor class CourseVideo(unitName : Text, unitNumber : Nat) {
       return videoInfo;
     };
 
-    public query func uploadVideoFileInfo(info : courseTypes.FileInfo) : async courseTypes.FileInfo {
-       videoInfo := ?info;
-       return info;
+    public  func uploadVideoFileInfo(info : courseTypes.FileInfo) : async ?courseTypes.FileInfo {
+       videoInfo := ?{
+          id = Principal.toText(Principal.fromActor(self));
+          fileName = info.fileName;
+          size  = info.size;
+          mimeType  = info.mimeType;
+          chunkCount = info.chunkCount;
+          allChunksUploaded = info.allChunksUploaded;
+       };
+       return videoInfo;
     };
     public query func getVideo(chunkId : Nat) : async [Nat8] {
          switch(Map.get(video, ihash, chunkId)) {
@@ -45,9 +53,16 @@ actor class CourseVideo(unitName : Text, unitNumber : Nat) {
       return videoBannerInfo;
     };
 
-    public query func uploadVideoBannerFileInfo(info : courseTypes.FileInfo) : async courseTypes.FileInfo {
-       videoBannerInfo := ?info;
-       return info;
+    public func uploadVideoBannerFileInfo(info : courseTypes.FileInfo) : async ?courseTypes.FileInfo {
+       videoBannerInfo := ?{
+          id = Principal.toText(Principal.fromActor(self));
+          fileName = info.fileName;
+          size  = info.size;
+          mimeType  = info.mimeType;
+          chunkCount = info.chunkCount;
+          allChunksUploaded = info.allChunksUploaded;
+       };
+       return videoBannerInfo;
     };
     public query func getVideoBanner(chunkId : Nat) : async [Nat8] {
          switch(Map.get(videoBanner, ihash, chunkId)) {
@@ -62,17 +77,16 @@ actor class CourseVideo(unitName : Text, unitNumber : Nat) {
     };
 
       // cycles related
-  public func getCurrentCycles() : async Nat {
+  public query func getCurrentCycles() : async Nat {
     return Cycles.balance();
  };
 
 
- 
-   public shared func getCurrentHeapMemory():  async Nat64 {
+   public  shared query func getCurrentHeapMemory():  async Nat64 {
         Nat64.fromNat(Prim.rts_heap_size());
     };
 
-    public shared func getCurrentMemory(): async Nat64 {
+    public shared query func getCurrentMemory(): async Nat64 {
         Nat64.fromNat(Prim.rts_memory_size());
     };
 
