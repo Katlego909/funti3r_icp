@@ -18,6 +18,7 @@ import auth "./modules/auth";
 import reviewModule "./modules/review";
 import ReviewDetails "components/ReviewDetails";
 import subcriptionModule "./modules/subscription";
+import Debug "mo:base/Debug";
 
 
 //importing canisters
@@ -343,17 +344,21 @@ private func getMinimumTaskAmount() : Nat {
         created_at_time = null; // null for now
      };
       let result = await ledger.icrc2_transfer_from(transferFromArgs);
-     
+   
       switch(result) {
         case(#Ok(re)) { 
             return true;
          };
+
         case(#Err(err)) { 
              return false;
         };
       };
 
   };
+
+
+
     
   //used when a principal wants a subType subscription type
   public  shared(msg) func subscribe(subType : types.SubscriptionModel) : async  types.Result<Text, Text> { 
