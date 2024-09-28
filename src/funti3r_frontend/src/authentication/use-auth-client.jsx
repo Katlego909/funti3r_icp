@@ -1,5 +1,9 @@
+
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { canisterId, idlFactory } from "../../../declarations/funti3r_backend/";
+//=====================
+import { canisterId as canisterId2, idlFactory as idlFactory2 } from "../../../declarations/icp_ledger_canister/";
+//=====================
 import { AuthClient } from "@dfinity/auth-client";  
 import { Principal } from '@dfinity/principal';    
 
@@ -9,6 +13,13 @@ export const useAuthClient = () => {
   const [identity, setIdentity] = useState(null);
   const [principal, setPrincipal] = useState(null);
   const [whoamiActor, setWhoamiActor] = useState(null);
+
+
+  //===========================================
+  const[whoamiActor2, setWhoamiActor2] = useState(null);
+  //===========================================
+
+
   const [profileType, setProfileType] = useState(null);
   const [authClient, setAuthClient] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
@@ -16,6 +27,7 @@ export const useAuthClient = () => {
   const [tasks, setTasks] = useState([]);
 
   const nnsCanisterId = 'ryjl3-tyaaa-aaaaa-aaaba-cai';
+
 
 
   useEffect(() => {
@@ -61,14 +73,24 @@ export const useAuthClient = () => {
 
       if (isConnected) {
 
-        const actor = await window.ic.plug.createActor({
+         const actor = await window.ic.plug.createActor({
           canisterId: canisterId,
-          interfaceFactory: idlFactory,
+           interfaceFactory: idlFactory,
+           host: "http://127.0.0.1:4943", 
+         });
+
+        //============================
+        const actor2 = await window.ic.plug.createActor({
+          canisterId: canisterId2,
+          interfaceFactory: idlFactory2,
           host: "http://127.0.0.1:4943", 
-        });
+        })
+//============
+
         const principal = await window.ic.plug.agent.getPrincipal();
         setIsAuthenticated(true);
-        return { actor, principal }; // Return both actor and principal
+        return { actor, actor2, principal }; // Return actor and principal (added actor2)
+
       } else {
         throw new Error("Unable to connect to Plug Wallet");
       }
@@ -80,11 +102,15 @@ export const useAuthClient = () => {
 
   const login = async () => {
     try {
-      const { actor , principal} = await getWalletIdentity()
+      const { actor ,actor2, principal} = await getWalletIdentity() //==added actor2
        await fetchProfileType()
        setWhoamiActor(actor);
+       //=================================================
+       setWhoamiActor2(actor2);
+       //=================================================
        setPrincipal(principal);
       console.log("Login successful, whoamiActor:", actor);
+      console.log("Womp womp, whoamiActor2:", actor2);
       console.log("Wallet connected, principal:", principal);
     } catch (error) {
       console.error("Login failed:", error);
@@ -255,6 +281,7 @@ export const useAuthClient = () => {
     try {
       const numericPrice = BigInt(taskData.price);
       const taskIdBigInt = BigInt(taskData.taskId);
+      const feeBigInt = BigInt(1200)
 
       const taskRecordToSend = {
         ...taskData,
@@ -263,12 +290,23 @@ export const useAuthClient = () => {
         promisor: [],
       };
 
-      // const isWalletConnected = () => {
-      //   return window.ic && window.ic.plug && window.ic.plug.isConnected();
-      // };
+       // Prepare the approval record with correct types
+    const approvalRecord = {
+      fee: [feeBigInt], 
+      memo: [Array.from(new TextEncoder().encode("Task approved"))], 
+      from_subaccount: [],
+      created_at_time: [BigInt(Date.now() * 1_000_000)], 
+      amount: numericPrice, 
+      expected_allowance: [], 
+      expires_at: [],
+      spender: {
+        owner: principal, 
+        subaccount: [],
+      }
+    };
       
       // In createTask function
-      const approval =  await requestPlugWalletApproval(numericPrice);
+      const approval = await whoamiActor2.icrc2_approve(approvalRecord);
       if (!approval) throw new Error("Transaction not approved by Plug Wallet");
 
       const result = await whoamiActor.listTask(taskRecordToSend,
@@ -280,98 +318,7 @@ export const useAuthClient = () => {
       throw new Error("Failed to create task on backend.");
     }
   };
-
-  const requestPlugWalletApproval = async (amount) => {
-    try {
-      if (!window.ic?.plug) {
-        throw new Error("Plug Wallet is not installed.");
-      }
-  
-      const connected = await window.ic.plug.isConnected();
-      console.log("Is Plug Wallet connected?", connected);
-      
-      if (!connected) {
-        const request_connect = await window.ic.plug.requestConnect();
-        if (!request_connect) {
-          throw new Error("User refused Plug Wallet connection.");
-        }
-      }
-  
-      const canister_principal = await whoamiActor.whoami();
-      console.log("Canister principal:", canister_principal.toText());
-  
-      // const formattedAmount = (Number(amount) / 1e8).toFixed(8).toString();
-      // console.log("Amount to transfer:", formattedAmount);
-
-      const hardcodedAmount =15_00_00_00_00; //testing purposes
-  
-  
-      console.log("Requesting Plug Wallet approval for task amount...");
-      const transfer_result = await window.ic.plug.requestTransfer({
-        // // to: canister_principal.toText(),
-        // to: nnsCanisterId,
-        // amount: hardcodedAmount,
-        // opts: {
-        //   fee: 0
-        // },
-        
-          to: canister_principal.toText(),
-          amount: hardcodedAmount,
-          opts: {
-            fee: 1000,
-            memo: "Task approved",
-            // from_subaccount: Number,
-            created_at_time: {
-              timestamp_nanos: 0
-            },
-          },
-        
-      });
-  
-      // transferFromArgs: {
-      //   spender_subaccount: null,
-      //   from: { owner: window.ic.plug.principalId, subaccount: null },
-      //   to: { owner: nnsCanisterId , subaccount: null },
-      //   amount: numericPrice,
-      //   fee: 0,
-      //   memo: null,
-      //   created_at_time: null,
-      
-  
-      console.log("Transfer result:", transfer_result);
-  
-      if (!transfer_result || !transfer_result.height) {
-        throw new Error("User did not approve the transaction.");
-      }
-  
-      return transfer_result;
-    } catch (error) {
-      console.error("Error during transaction approval:", error);
-      throw new Error("Failed to request approval from Plug Wallet.");
-    }
-  };
-  
-  
-    // // Helper function to request approval using Plug Wallet
-    // const requestPlugWalletApproval = async (amount) => {
-    //   try {
-    //     if (!window.ic?.plug) {
-    //       throw new Error("Plug Wallet is not installed.");
-    //     }
-  
-    //     const transferResult = await window.ic.plug.requestTransfer({
-    //       to: principal, // Replace with the receiver's Principal or Account ID
-    //       amount: amount.toString(),
-    //       opts: {},
-    //     });
-  
-    //     console.log(`Approval result:`, transferResult);
-    //     return transferResult.success;
-    //   } catch (error) {
-    //     console.error("User denied transaction in Plug Wallet:", error);
-    //     return false;
-    //   }
-    // };
+7
   
     // Fetch all listed tasks
     const fetchAllListedTasks = async () => {
