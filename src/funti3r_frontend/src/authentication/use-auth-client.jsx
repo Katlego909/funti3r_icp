@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { canisterId, idlFactory } from "../../../declarations/funti3r_backend/";
+
 //=====================
 import { canisterId as canisterId2, idlFactory as idlFactory2 } from "../../../declarations/icp_ledger_canister/";
 //=====================
@@ -16,7 +17,7 @@ export const useAuthClient = () => {
 
 
   //===========================================
-  const[whoamiActor2, setWhoamiActor2] = useState(null);
+  const[icpLedger, seticpLedger] = useState(null);
   //===========================================
 
 
@@ -66,8 +67,8 @@ export const useAuthClient = () => {
 
   const getWalletIdentity = async () => {
     try {
-      const isConnected =  await window.ic.plug.requestConnect({
-        whitelist: [canisterId, nnsCanisterId],
+      const isConnected = await window.ic.plug.requestConnect({
+        whitelist: [canisterId2, canisterId],
         host: "http://127.0.0.1:4943"
       });
 
@@ -106,11 +107,11 @@ export const useAuthClient = () => {
        await fetchProfileType()
        setWhoamiActor(actor);
        //=================================================
-       setWhoamiActor2(actor2);
+       seticpLedger(actor2);
        //=================================================
        setPrincipal(principal);
       console.log("Login successful, whoamiActor:", actor);
-      console.log("Womp womp, whoamiActor2:", actor2);
+      console.log("Womp womp, icpLedger:", actor2);
       console.log("Wallet connected, principal:", principal);
     } catch (error) {
       console.error("Login failed:", error);
@@ -278,40 +279,45 @@ export const useAuthClient = () => {
   };
 
   const createTask = async (taskData) => {
+    //to do
+    // allow the user to enter price in icp
+    // convert the price to e8s by mulitpilying by 10*8 since one 1pc = 10*8 e8s
     try {
-      const numericPrice = BigInt(taskData.price);
+      const feeBigInt = BigInt(10000)
+      const allowance = BigInt(taskData.price + feeBigInt); // the lister should also pay for the transfer fee
       const taskIdBigInt = BigInt(taskData.taskId);
-      const feeBigInt = BigInt(1200)
-
+      console.log(allowance)
       const taskRecordToSend = {
         ...taskData,
-        price: numericPrice,
         taskId: taskIdBigInt,
+        price : BigInt(taskData.price),
         promisor: [],
       };
 
        // Prepare the approval record with correct types
     const approvalRecord = {
-      fee: [feeBigInt], 
-      memo: [Array.from(new TextEncoder().encode("Task approved"))], 
+      fee: [],
+      memo: [],
       from_subaccount: [],
-      created_at_time: [BigInt(Date.now() * 1_000_000)], 
-      amount: numericPrice, 
-      expected_allowance: [], 
+      created_at_time: [],
+      amount: allowance,
+      expected_allowance: [],
       expires_at: [],
       spender: {
-        owner: principal, 
-        subaccount: [],
+        owner: Principal.fromText(canisterId),
+        subaccount: []
       }
     };
       
       // In createTask function
-      const approval = await whoamiActor2.icrc2_approve(approvalRecord);
-      if (!approval) throw new Error("Transaction not approved by Plug Wallet");
-
-      const result = await whoamiActor.listTask(taskRecordToSend,
-       );
+      const approval = await icpLedger.icrc2_approve(approvalRecord);
+    
+      console.log(approval)
+      if (!(approval.Ok)) throw new Error("Transaction not approved by Plug Wallet");
+      const result = await whoamiActor.listTask(taskRecordToSend);
       console.log(result)
+      if (!result.ok) throw new Error(result.err)
+      
       return result;
     } catch (err) {
       console.error("Error creating task:", err);
@@ -338,8 +344,8 @@ export const useAuthClient = () => {
     const fetchTaskByOwner = async () => {
       try {
         const result = await whoamiActor.getTasksByOwner();
-        if ("Ok" in result) {
-          return result;
+        if ("ok" in result) {
+          return result.ok;
         } else {
           console.error(result.Err);
         }

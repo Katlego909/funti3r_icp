@@ -246,7 +246,7 @@ private func payForTask(amount : Nat, taskOwner: Principal) : async types.Result
           if(await transferFrom(taskOwner, await whoami(), amount)) {
               return #ok("success");
           }  else {
-              return #err("faild to transfer, you did not approve");
+              return #err("faild to transfer funds, make sure you have enough funds and try again. ");
           }
       }
 };

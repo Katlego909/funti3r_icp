@@ -12,6 +12,7 @@ const MyListedTasks = () => {
     if (isAuthenticated) {
       fetchTaskByOwner()
         .then((fetchedTasks) => {
+          console.log(fetchedTasks)
           setTasks(fetchedTasks || []);
           setLoading(false);
         })
