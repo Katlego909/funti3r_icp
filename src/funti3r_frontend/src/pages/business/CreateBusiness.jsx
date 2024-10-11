@@ -1,41 +1,56 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../authentication/use-auth-client'; // Ensure the correct path to your useAuth hook
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../authentication/use-auth-client';
 import backgroundImage from '../../assets/feature4.jpg'; // Ensure this path is correct
 
 const CreateBusiness = () => {
-  const { whoamiActor } = useAuth();
-  const [formData, setFormData] = useState({
+  const navigate = useNavigate();
+  const { createBusinessProfile } = useAuth();
+  const [form, setForm] = useState({
     name: '',
     email: '',
     phone: '',
     location: '',
-    socials: '', // Updated to string for input
-    description: ''
+    socials: [],
+    description: '',
+    applications: [],
+    subscription: 'none' // Default subscription
   });
-  const [result, setResult] = useState('');
-  const [loading, setLoading] = useState(false);
+
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const validateForm = () => {
+    if (!form.name || !form.email || !form.phone || !form.location) {
+      setError('Please fill in all required fields.');
+      return false;
+    }
+    if (!/\S+@\S+\.\S+/.test(form.email)) {
+      setError('Please enter a valid email address.');
+      return false;
+    }
+    return true;
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setLoading(true);
     setError('');
 
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
     try {
-      const response = await whoamiActor.createBusiness({
-        ...formData,
-        socials: formData.socials.split(','),
-      });
-      setResult(response);
+      await createBusinessProfile(form, navigate);
     } catch (error) {
-      setError('Failed to create business profile: ' + error.message);
+      setError('Failed to create business profile. Please try again.');
+      console.error('Failed to create business profile:', error);
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -48,7 +63,7 @@ const CreateBusiness = () => {
           backgroundImage: `url(${backgroundImage})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          filter: 'blur(8px)', // Adjust the blur amount as needed
+          filter: 'blur(8px)',
         }}
       ></div>
 
@@ -64,24 +79,24 @@ const CreateBusiness = () => {
 
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
-        {['name', 'email', 'phone', 'location', 'socials', 'description'].map((field, index) => (
+        {['name', 'email', 'phone', 'location', 'description'].map((field, index) => (
           <div key={index} className="mb-4">
             {field !== 'description' ? (
               <input
                 type={field === 'email' ? 'email' : field === 'phone' ? 'tel' : 'text'}
                 name={field}
-                value={formData[field]}
+                value={form[field]}
                 onChange={handleChange}
                 placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
-                required={field !== 'socials'} // Make all fields required except socials
+                required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             ) : (
               <textarea
                 name={field}
-                value={formData[field]}
+                value={form[field]}
                 onChange={handleChange}
-                placeholder="Description"
+                placeholder="Business Description"
                 rows="4"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -89,15 +104,26 @@ const CreateBusiness = () => {
           </div>
         ))}
 
+        <div className="mb-4">
+          <select
+            name="subscription"
+            value={form.subscription}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="none">None</option>
+            <option value="premium">Premium</option>
+            <option value="enterprise">Enterprise</option>
+          </select>
+        </div>
+
         <button
           type="submit"
-          disabled={loading}
+          disabled={isSubmitting}
           className="w-full px-4 py-2 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black transition duration-150 ease-in-out"
         >
-          {loading ? 'Submitting...' : 'Submit'}
+          {isSubmitting ? 'Submitting...' : 'Submit'}
         </button>
-
-        {result && <p className="text-center text-green-600 mt-4">Result: {result}</p>}
       </form>
     </div>
   );

@@ -21,7 +21,7 @@ import CreateUser from './pages/user/CreateUser';
 
 // Other
 import Login from './pages/Login';
-import CreateUserProfile from './pages/common/CreateUserProfile'
+
 
 import ProfileSelection from './pages/common/ProfileSelection';
 
