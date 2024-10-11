@@ -9,11 +9,41 @@ const MyListedTasks = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+
+  const flattenTasks = (arr) => {
+    let flatTasks = [];
+    
+    arr.forEach(item => {
+      if (Array.isArray(item)) {
+        flatTasks = flatTasks.concat(flattenTasks(item));  // Recursively flatten arrays
+      } else if (item.hasOwnProperty('taskId')) {
+        flatTasks.push(item);  // If it's a task, add it to the flat array
+      }
+    });
+    
+    return flatTasks;
+  };
+
+  // const fetchTasks = async () => {
+  //   try {
+  //     const fetchedTasks = await fetchTaskByOwner();
+  //     console.log("Fetched tasks:", fetchedTasks); // Debugging: Check the response here
+  //     setTasks(fetchedTasks || []);
+  //   } catch (err) {
+  //     console.error("Error fetching tasks:", err);
+  //     setError('Failed to fetch tasks. Please try again later.');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const fetchTasks = async () => {
     try {
       const fetchedTasks = await fetchTaskByOwner();
-      console.log("Fetched tasks:", fetchedTasks); // Debugging: Check the response here
-      setTasks(fetchedTasks || []);
+      console.log("Fetched tasks:", fetchedTasks); 
+  
+      const flatTasks = flattenTasks(fetchedTasks); // Flatten the tasks
+      setTasks(flatTasks || []);  // Set the flattened tasks
     } catch (err) {
       console.error("Error fetching tasks:", err);
       setError('Failed to fetch tasks. Please try again later.');
@@ -70,12 +100,12 @@ const MyListedTasks = () => {
         </div>
 
         {/* Display the raw tasks data */}
-        <div className="my-6 p-4 bg-gray-100 rounded">
+        {/* <div className="my-6 p-4 bg-gray-100 rounded">
           <h3 className="text-xl font-semibold mb-4">Raw Task Data (for Debugging):</h3>
           <pre className="overflow-auto p-4 bg-gray-200 rounded">
             {JSON.stringify(tasks, replacer, 2)}
           </pre>
-        </div>
+        </div> */}
 
         {/* Display tasks in square boxes */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 my-6">

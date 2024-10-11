@@ -25,7 +25,7 @@ const Sidebar = () => {
     <div className="h-screen grid grid-cols-[auto_1fr]">
       {/* Sidebar */}
       <div className={`w-64 bg-black h-screen shadow-lg overflow-y-hidden border-r border-gray-400 fixed top-0 left-0 z-10 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform sm:translate-x-0`}>
-        <div className="flex items-center justify-between p-5 mb-2 bg-black">
+        <div className="flex items-center justify-between p-5 mb-2 bg-funBlack">
           <div className="flex items-center gap-2 text-3xl font-bold text-white">
             <span>Funti3r</span>
             <img src={Logo} alt="Logo" className="h-12" /> {/* Increased logo size here */}

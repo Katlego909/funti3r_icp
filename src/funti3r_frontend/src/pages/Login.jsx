@@ -49,7 +49,7 @@ const handleLogin = async () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Header Section with Navigation Tabs */}
-      <header className="w-full bg-black text-white px-6 py-4 fixed top-0 z-20">
+      <header className="w-full bg-black text-white px-6 py-4 fixed top-0 z-20" style={{ backgroundColor: '#0e0e0e' }}>
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center">
             <img src={Logo} alt="Funti3r Logo" className="h-12 w-12" />
@@ -58,25 +58,25 @@ const handleLogin = async () => {
           <nav className="space-x-6">
             <a
               onClick={() => handleScroll('about')}
-              className={`cursor-pointer hover:text-gray-300 transition ${selectedSection === 'about' ? 'underline' : ''}`}
+              className={`cursor-pointer hover:text-gray-300 transition text-base ${selectedSection === 'about' ? 'underline' : ''}`}
             >
               About Us
             </a>
             <a
               onClick={() => handleScroll('services')}
-              className={`cursor-pointer hover:text-gray-300 transition ${selectedSection === 'services' ? 'underline' : ''}`}
+              className={`cursor-pointer hover:text-gray-300 transition text-base ${selectedSection === 'services' ? 'underline' : ''}`}
             >
               Services
             </a>
             <a
               onClick={() => handleScroll('how-it-works')}
-              className={`cursor-pointer hover:text-gray-300 transition ${selectedSection === 'how-it-works' ? 'underline' : ''}`}
+              className={`cursor-pointer hover:text-gray-300 transition text-base ${selectedSection === 'how-it-works' ? 'underline' : ''}`}
             >
               How It Works
             </a>
             <a
               onClick={() => handleScroll('testimonials')}
-              className={`cursor-pointer hover:text-gray-300 transition ${selectedSection === 'testimonials' ? 'underline' : ''}`}
+              className={`cursor-pointer hover:text-gray-300 transition text-base ${selectedSection === 'testimonials' ? 'underline' : ''}`}
             >
               Testimonials
             </a>
@@ -198,9 +198,9 @@ const handleLogin = async () => {
       </section>
 
       {/* Footer Section */}
-      <footer className="bg-black text-white py-6 mt-12">
+      <footer className="bg-black text-white py-6 mt-12" style={{ backgroundColor: '#0e0e0e' }}>
         <div className="max-w-7xl mx-auto text-center">
-          <p>&copy; {new Date().getFullYear()} Funti3r. All rights reserved.</p>
+          <p className='text-base' >&copy; {new Date().getFullYear()} Funti3r. All rights reserved.</p>
         </div>
       </footer>
     </div>

@@ -7,7 +7,11 @@ export default {
     '../pages/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        funBlack: '#0e0e0e'
+      }
+    },
   },
   plugins: [],
 }
