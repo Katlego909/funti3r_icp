@@ -280,15 +280,18 @@ export const useAuthClient = () => {
 
   const createTask = async (taskData) => {
     try {
+      // Log the task data inputs before processing
+      console.log("Inserted Task Inputs:", taskData);
+  
       const feeBigInt = BigInt(10000);
       const allowance = BigInt(taskData.price + feeBigInt); // The lister should also pay for the transfer fee
       const taskIdBigInt = BigInt(taskData.taskId);
-      
+  
       // Format the expectedCompletionDate to 'YYYY-MM-DD'
       const formattedCompletionDate = new Date(taskData.expectedCompletionDate).toISOString().split("T")[0];
       
-      // Format the postedDate to 'YYYY-MM-DD' instead of the full ISO format
-      const formattedPostedDate = new Date().toISOString().split("T")[0]; // Change to match the backend's expected format
+      // Format the postedDate to 'YYYY-MM-DD'
+      const formattedPostedDate = new Date().toISOString().split("T")[0]; 
   
       const taskRecordToSend = {
         ...taskData,
@@ -320,13 +323,17 @@ export const useAuthClient = () => {
       // List the task on the backend
       const result = await whoamiActor.listTask(taskRecordToSend);
       if (!result.ok) throw new Error(result.err);
-  
+      
+      // Print success message in the console
+      console.log("Task successfully created:", result);
+      
       return result;
     } catch (err) {
       console.error("Error creating task:", err);
       throw new Error("Failed to create task on backend.");
     }
   };
+  
   
 7
   
