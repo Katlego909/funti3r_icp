@@ -279,51 +279,55 @@ export const useAuthClient = () => {
   };
 
   const createTask = async (taskData) => {
-    //to do
-    // allow the user to enter price in icp
-    // convert the price to e8s by mulitpilying by 10*8 since one 1pc = 10*8 e8s
     try {
-      const feeBigInt = BigInt(10000)
-      const allowance = BigInt(taskData.price + feeBigInt); // the lister should also pay for the transfer fee
+      const feeBigInt = BigInt(10000);
+      const allowance = BigInt(taskData.price + feeBigInt); // The lister should also pay for the transfer fee
       const taskIdBigInt = BigInt(taskData.taskId);
-      console.log(allowance)
+      
+      // Format the expectedCompletionDate to 'YYYY-MM-DD'
+      const formattedCompletionDate = new Date(taskData.expectedCompletionDate).toISOString().split("T")[0];
+      
+      // Format the postedDate to 'YYYY-MM-DD' instead of the full ISO format
+      const formattedPostedDate = new Date().toISOString().split("T")[0]; // Change to match the backend's expected format
+  
       const taskRecordToSend = {
         ...taskData,
         taskId: taskIdBigInt,
-        price : BigInt(taskData.price),
-        promisor: [],
+        price: BigInt(taskData.price),
+        expectedCompletionDate: formattedCompletionDate, // Update this field with the formatted date
+        postedDate: formattedPostedDate, // Update this field with the formatted date
+        promisor: [], // Ensure promisor is an empty array or appropriate structure
       };
-
-       // Prepare the approval record with correct types
-    const approvalRecord = {
-      fee: [],
-      memo: [],
-      from_subaccount: [],
-      created_at_time: [],
-      amount: allowance,
-      expected_allowance: [],
-      expires_at: [],
-      spender: {
-        owner: Principal.fromText(canisterId),
-        subaccount: []
-      }
-    };
-      
-      // In createTask function
+  
+      const approvalRecord = {
+        fee: [],
+        memo: [],
+        from_subaccount: [],
+        created_at_time: [],
+        amount: allowance,
+        expected_allowance: [],
+        expires_at: [],
+        spender: {
+          owner: Principal.fromText(canisterId),
+          subaccount: [],
+        },
+      };
+  
+      // Approve the transaction in the ICP ledger
       const approval = await icpLedger.icrc2_approve(approvalRecord);
-    
-      console.log(approval)
-      if (!(approval.Ok)) throw new Error("Transaction not approved by Plug Wallet");
+      if (!approval.Ok) throw new Error("Transaction not approved by Plug Wallet");
+  
+      // List the task on the backend
       const result = await whoamiActor.listTask(taskRecordToSend);
-      console.log(result)
-      if (!result.ok) throw new Error(result.err)
-      
+      if (!result.ok) throw new Error(result.err);
+  
       return result;
     } catch (err) {
       console.error("Error creating task:", err);
       throw new Error("Failed to create task on backend.");
     }
   };
+  
 7
   
     // Fetch all listed tasks
