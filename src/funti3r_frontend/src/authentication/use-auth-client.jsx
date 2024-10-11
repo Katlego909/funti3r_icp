@@ -111,7 +111,7 @@ export const useAuthClient = () => {
        //=================================================
        setPrincipal(principal);
       console.log("Login successful, whoamiActor:", actor);
-      console.log("Womp womp, icpLedger:", actor2);
+      console.log("ICP Ledger Created, icpLedger:", actor2);
       console.log("Wallet connected, principal:", principal);
     } catch (error) {
       console.error("Login failed:", error);
