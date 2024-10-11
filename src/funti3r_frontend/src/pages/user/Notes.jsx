@@ -64,7 +64,7 @@ const Notes = () => {
         ))}
 
         <button
-          className="bg-purple-600 text-white font-medium p-2 rounded-lg hover:bg-purple-700 transition duration-200"
+          className="bg-black text-white font-medium p-2 rounded-lg hover:bg-gray-800 transition duration-200"
           onClick={addNote}
         >
           Add Note

@@ -40,12 +40,7 @@ const App = () => {
           <Route path="/create-profile/user" element={<CreateUser />} />
           <Route path="/create-profile/business" element={<CreateBusiness />} />
           
-          {/* Example of redirecting to dashboard if already authenticated */}
-          {/* <Route path="/create-profile" element={isAuthenticated ? <Navigate to={`/${profileType}/dashboard`} /> : <Login />} /> */}
-          {/* <Route path="/create-profile" element={<CreateUserProfile />} /> */}
-
-
-
+        
           {/* User Routes */}
           {isAuthenticated && profileType === 'user' && (
             <Route path="/user" element={<UserLayout />}>

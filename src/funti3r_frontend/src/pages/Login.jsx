@@ -1,152 +1,210 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../authentication/use-auth-client';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faStar } from '@fortawesome/free-solid-svg-icons';
-import Logo from '../assets/logo.svg';
+import Logo from '../assets/logo.svg'; // Example logo image
+import heroBgImage from '../assets/feature1.jpg'; // Example background image
 
-const Login = () => {
+const LandingPage = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, login, fetchProfileType, profileType } = useAuth();
+  const { isAuthenticated, login, fetchProfileType } = useAuth();
+  
+  const [selectedSection, setSelectedSection] = useState('about'); // Default selected section
 
-  // Check if the user is already authenticated and redirect to the respective dashboard
-  useEffect(() => {
-    const checkAuthStatus = async () => {
-      if (isAuthenticated) {
-        const profileType = await fetchProfileType();
+ // Check if the user is already authenticated and redirect to the respective dashboard
+ useEffect(() => {
+  const checkAuthStatus = async () => {
+    if (isAuthenticated) {
+      const profileType = await fetchProfileType();
 
-        if (profileType === 'user') {
-          navigate('/user/dashboard', { replace: true });
-        } else if (profileType === 'business') {
-          navigate('/business/dashboard', { replace: true });
-        } else {
-          navigate('/create-profile', { replace: true });
-        }
+      if (profileType === 'user') {
+        navigate('/user/dashboard', { replace: true });
+      } else if (profileType === 'business') {
+        navigate('/business/dashboard', { replace: true });
+      } else {
+        navigate('/create-profile', { replace: true });
       }
-    };
+    }
+  };
 
-    checkAuthStatus();
-  }, [isAuthenticated, fetchProfileType, navigate]);
+  checkAuthStatus();
+}, [isAuthenticated, fetchProfileType, navigate]);
 
-  const handleLogin = async () => {
-    try {
-      await login();
-      // After login, the effect will trigger the navigation
-    } catch (error) {
-      console.error('Login failed:', error);
+const handleLogin = async () => {
+  try {
+    await login();
+    // After login, the effect will trigger the navigation
+  } catch (error) {
+    console.error('Login failed:', error);
+  }
+};
+
+  const handleScroll = (section) => {
+    const element = document.getElementById(section);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+      setSelectedSection(section);
     }
   };
 
   return (
-    <div>
-      {/* Navigation Bar */}
-      <div className="bg-[#4a004e] p-4 flex justify-between items-center">
-        <div className="flex items-center">
-          <img src={Logo} alt="Logo" className="w-16 sm:w-20 h-auto" />
+    <div className="min-h-screen bg-white">
+      {/* Header Section with Navigation Tabs */}
+      <header className="w-full bg-black text-white px-6 py-4 fixed top-0 z-20">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex items-center">
+            <img src={Logo} alt="Funti3r Logo" className="h-12 w-12" />
+            <h1 className="ml-3 text-2xl font-semibold">Funti3r</h1>
+          </div>
+          <nav className="space-x-6">
+            <a
+              onClick={() => handleScroll('about')}
+              className={`cursor-pointer hover:text-gray-300 transition ${selectedSection === 'about' ? 'underline' : ''}`}
+            >
+              About Us
+            </a>
+            <a
+              onClick={() => handleScroll('services')}
+              className={`cursor-pointer hover:text-gray-300 transition ${selectedSection === 'services' ? 'underline' : ''}`}
+            >
+              Services
+            </a>
+            <a
+              onClick={() => handleScroll('how-it-works')}
+              className={`cursor-pointer hover:text-gray-300 transition ${selectedSection === 'how-it-works' ? 'underline' : ''}`}
+            >
+              How It Works
+            </a>
+            <a
+              onClick={() => handleScroll('testimonials')}
+              className={`cursor-pointer hover:text-gray-300 transition ${selectedSection === 'testimonials' ? 'underline' : ''}`}
+            >
+              Testimonials
+            </a>
+          </nav>
         </div>
-        <div>
+      </header>
+
+      {/* Hero Section with Background Image */}
+      <section
+        className="relative bg-cover bg-center text-center h-screen flex flex-col justify-center items-center text-white"
+        style={{ backgroundImage: `url(${heroBgImage})` }}
+      >
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black opacity-60"></div>
+
+        {/* Hero Content */}
+        <div className="relative z-10">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">Empowering Entrepreneurs with Funti3r</h1>
+          <p className="text-lg text-gray-200 max-w-2xl mx-auto mb-10">
+            Streamline operations and enhance productivity by connecting with skilled microtaskers across various sectors.
+          </p>
           <button
             onClick={handleLogin}
-            className="px-3 sm:px-4 py-2 text-white bg-orange-500 rounded-md hover:bg-orange-600 transition-colors"
+            className="px-6 py-3 bg-gray-800 text-white text-lg rounded-md hover:bg-gray-700 transition"
           >
-            {isAuthenticated ? 'Get Started' : 'Login with Wallet'}
+            Login with Wallet
           </button>
         </div>
-      </div>
+      </section>
 
-      <div className="p-5">
-        {/* Hero Section */}
-        <div className="bg-gradient-to-r from-[#4a004e] to-[#3c2b63] text-white p-6 sm:p-10 rounded-lg text-center">
-          <h5 className="text-2xl sm:text-3xl font-bold underline mb-2">Explore Micro-tasking</h5>
-          <h1 className="text-3xl sm:text-4xl mb-3">Maximize Efficiency, Empower Teams.</h1>
-          <p className="text-base sm:text-lg mb-4">
-            Our innovative micro-tasking application is designed to unlock unprecedented efficiency.
+      {/* About Us Section (White Background) */}
+      <section id="about" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <h2 className="text-3xl font-bold text-gray-800 mb-8">About Funti3r</h2>
+          <p className="text-lg text-gray-600 max-w-4xl mx-auto">
+            Funti3r is dedicated to helping entrepreneurs thrive by connecting them with skilled microtaskers from various sectors.
+            Our platform streamlines operations, improves productivity, and allows businesses to grow by matching them with the 
+            right talent.
           </p>
+        </div>
+      </section>
 
-          {/* Search Bar */}
-          <div className="mt-5">
-            <form method="get" action="/home" className="flex flex-col sm:flex-row items-center justify-center">
-              <input
-                type="text"
-                name="search"
-                id="search"
-                placeholder="Search for tasks..."
-                className="p-2 rounded-l-md w-full sm:w-3/4 border-none"
-              />
-              <button
-                type="submit"
-                value="Filter"
-                className="mt-2 sm:mt-0 p-2 bg-orange-500 text-white rounded-md sm:rounded-r-md hover:bg-orange-600 transition-colors w-full sm:w-auto"
-              >
-                <FontAwesomeIcon icon={faSearch} />
-              </button>
-            </form>
-          </div>
-
-          {/* Categories */}
-          <div className="mt-5">
-            <p className="text-lg mb-2">Popular categories:</p>
-            <div className="flex flex-wrap justify-center">
-              <button className="bg-[#4a004e] text-white py-2 px-4 rounded-md m-2 hover:bg-[#3c2b63] transition-colors">
-                <FontAwesomeIcon icon={faStar} className="mr-2" /> Top Rated
-              </button>
-              {/* Add more categories as needed */}
+      {/* Services Section */}
+      <section id="services" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <h2 className="text-3xl font-bold text-gray-800 mb-12">Our Services</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="bg-gray-100 p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300">
+              <h3 className="text-2xl font-semibold text-gray-800 mb-2">Task Management</h3>
+              <p className="text-gray-600">Efficiently manage tasks and projects with Funti3r’s smart tasking system.</p>
+            </div>
+            <div className="bg-gray-100 p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300">
+              <h3 className="text-2xl font-semibold text-gray-800 mb-2">Collaboration Tools</h3>
+              <p className="text-gray-600">Seamlessly collaborate with teams and microtaskers using our communication tools.</p>
+            </div>
+            <div className="bg-gray-100 p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300">
+              <h3 className="text-2xl font-semibold text-gray-800 mb-2">Real-time Monitoring</h3>
+              <p className="text-gray-600">Track progress and get real-time updates on all your projects and tasks.</p>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* Top Tasks Section */}
-        <div className="mt-10 p-5 bg-gray-100 rounded-lg">
-          <h2 className="text-2xl mb-4">Top Tasks</h2>
-          <div className="flex flex-wrap gap-5">
-            {/* Example task card */}
-            <div className="bg-white p-5 rounded-lg shadow-md w-full sm:w-[45%] lg:w-[30%]">
-              <h3 className="text-lg mb-2">Task Name</h3>
-              <p className="text-sm mb-4">Brief description of the task.</p>
-              <button className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors">
-                Apply Now
-              </button>
+      {/* How It Works Section */}
+      <section id="how-it-works" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <h2 className="text-3xl font-bold text-gray-800 mb-12">How It Works</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="p-6">
+              <div className="text-gray-800 mb-4">
+                <span className="block text-4xl font-bold">1</span>
+                <h3 className="text-2xl font-semibold">Sign Up</h3>
+              </div>
+              <p className="text-gray-600">Create an account and explore Funti3r's features tailored to entrepreneurs and microtaskers.</p>
             </div>
-            {/* Repeat task cards as needed */}
+            <div className="p-6">
+              <div className="text-gray-800 mb-4">
+                <span className="block text-4xl font-bold">2</span>
+                <h3 className="text-2xl font-semibold">Post Tasks</h3>
+              </div>
+              <p className="text-gray-600">Post tasks or projects and get connected to the right microtaskers in your sector.</p>
+            </div>
+            <div className="p-6">
+              <div className="text-gray-800 mb-4">
+                <span className="block text-4xl font-bold">3</span>
+                <h3 className="text-2xl font-semibold">Track & Complete</h3>
+              </div>
+              <p className="text-gray-600">Track your task’s progress in real-time and complete projects seamlessly.</p>
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* Testimonials Section */}
-        <div className="mt-10 p-5 bg-gray-100 rounded-lg">
-          <h2 className="text-2xl mb-4">What Our Users Say</h2>
-          <div className="bg-white p-5 rounded-lg shadow-md">
-            <p className="italic mb-2">“Funti3r has revolutionized the way I manage tasks. It's efficient and user-friendly!”</p>
-            <p className="text-sm text-gray-600">- Anonymous</p>
-          </div>
-          {/* Add more testimonials as needed */}
-        </div>
-
-        {/* Footer */}
-        <footer className="bg-[#4a004e] text-white p-5 mt-10 rounded-lg">
-          <div className="flex flex-col sm:flex-row justify-between flex-wrap">
-            <div className="flex-1 mb-5">
-              <h3 className="text-lg mb-2">About Funti3r</h3>
-              <p className="text-sm">Information about Funti3r and its mission.</p>
-            </div>
-            <div className="flex-1 mb-5">
-              <h3 className="text-lg mb-2">Contact Us</h3>
-              <p className="text-sm">Email: contact@funti3r.com</p>
-              <p className="text-sm">Phone: +1-234-567-890</p>
-            </div>
-            <div className="flex-1 mb-5">
-              <h3 className="text-lg mb-2">Follow Us</h3>
-              <p className="text-sm">
-                <a href="#" className="text-orange-500">Facebook</a> | <a href="#" className="text-orange-500">Twitter</a> | <a href="#" className="text-orange-500">Instagram</a>
+      {/* Testimonials Section */}
+      <section id="testimonials" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <h2 className="text-3xl font-bold text-gray-800 mb-12">What Our Users Say</h2>
+          <div className="flex space-x-6 overflow-x-auto">
+            <div className="bg-gray-100 p-6 rounded-lg shadow-lg">
+              <p className="text-gray-600 mb-4">
+                "Funti3r has transformed the way we manage projects. Their task management system is intuitive and easy to use."
               </p>
+              <h4 className="font-semibold">- John Doe</h4>
+            </div>
+            <div className="bg-gray-100 p-6 rounded-lg shadow-lg">
+              <p className="text-gray-600 mb-4">
+                "The collaboration tools have made remote work so much easier. I can connect with my team in real time!"
+              </p>
+              <h4 className="font-semibold">- Jane Smith</h4>
+            </div>
+            <div className="bg-gray-100 p-6 rounded-lg shadow-lg">
+              <p className="text-gray-600 mb-4">
+                "Funti3r helped us find skilled microtaskers quickly. Our productivity has significantly increased!"
+              </p>
+              <h4 className="font-semibold">- Mark Johnson</h4>
             </div>
           </div>
-          <div className="border-t border-white pt-4 text-center">
-            <p className="text-sm">&copy; 2024 Funti3r. All rights reserved.</p>
-          </div>
-        </footer>
-      </div>
+        </div>
+      </section>
+
+      {/* Footer Section */}
+      <footer className="bg-black text-white py-6 mt-12">
+        <div className="max-w-7xl mx-auto text-center">
+          <p>&copy; {new Date().getFullYear()} Funti3r. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 };
 
-export default Login;
+export default LandingPage;

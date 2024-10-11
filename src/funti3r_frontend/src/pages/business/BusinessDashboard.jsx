@@ -1,84 +1,173 @@
-import React from 'react';
-import { Line, Bar } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement } from 'chart.js';
+import React, { useEffect, useState } from 'react';
+import { Grid, Card, CardContent, Typography, Button } from '@mui/material';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTasks, faBell, faClipboardList } from '@fortawesome/free-solid-svg-icons';
+import backgroundImage from '../../assets/feature1.jpg';
+import { useAuth } from '../../authentication/use-auth-client'; // Import the auth hook
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement);
-//Will edit to resemble accurate data once tasklisting works
 const BusinessDashboard = () => {
-  const lineData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-    datasets: [
-      {
-        label: 'Sales',
-        data: [12, 19, 3, 5, 2, 3],
-        borderColor: '#7C3AED',
-        backgroundColor: 'rgba(124, 58, 237, 0.2)',
-        fill: true,
-      },
-    ],
-  };
+  const { businessProfile, fetchBusinessProfile } = useAuth(); // Fetch the business profile
+  const totalTasks = 0;
+  const pendingApplications = 0;
+  const [businessName, setBusinessName] = useState('');
 
-  const barData = {
-    labels: ['Dec 22', 'Jan 23', 'Feb 23', 'Mar 23', 'Apr 23', 'May 23'],
-    datasets: [
-      {
-        label: 'Direct',
-        data: [4000, 3000, 5000, 4000, 6000, 2000],
-        backgroundColor: '#60A5FA',
-      },
-      {
-        label: 'Indirect',
-        data: [7000, 9000, 12000, 11000, 10000, 9000],
-        backgroundColor: '#A78BFA',
-      },
-    ],
-  };
+  useEffect(() => {
+    const fetchProfile = async () => {
+      await fetchBusinessProfile();
+      if (businessProfile) {
+        setBusinessName(businessProfile.name); // Set the business name
+      }
+    };
+    fetchProfile();
+  }, [fetchBusinessProfile, businessProfile]);
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 flex flex-col items-center">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl">
-        {/* Sales Cards */}
-        <div className="bg-white shadow-md rounded-lg p-4">
-          <h2 className="text-gray-500 text-sm font-medium">Tasks Completed</h2>
-          <h1 className="text-2xl font-bold text-gray-800 mt-2"></h1>
-          <p className="text-green-500 font-medium">+10</p>
-          <Line data={lineData} height={80} />
-        </div>
-
-        <div className="bg-white shadow-md rounded-lg p-4">
-          <h2 className="text-gray-500 text-sm font-medium">Tasks in Progress</h2>
-          <h1 className="text-2xl font-bold text-gray-800 mt-2"></h1>
-          <p className="text-green-500 font-medium">+10</p>
-          <Line data={lineData} height={80} />
-        </div>
-
-        <div className="bg-white shadow-md rounded-lg p-4">
-          <h2 className="text-gray-500 text-sm font-medium">Tasks Pending</h2>
-          <h1 className="text-2xl font-bold text-gray-800 mt-2"></h1>
-          <p className="text-green-500 font-medium">+10</p>
-          <Line data={lineData} height={80} />
-        </div>
-
-        {/* Direct vs Indirect */}
-        <div className="bg-white shadow-md rounded-lg p-4 col-span-1 sm:col-span-2">
-          <h2 className="text-gray-500 text-sm font-medium">Completed VS Incomplete Tasks</h2>
-          <div className="flex items-center justify-between mt-2">
-            <h1 className="text-xl font-bold text-gray-800"></h1>
-            <h1 className="text-xl font-bold text-gray-800"></h1>
-          </div>
-          <Bar data={barData} height={100} />
-        </div>
-
-        {/* Real-Time Value */}
-        <div className="bg-white shadow-md rounded-lg p-4">
-          <h2 className="text-gray-500 text-sm font-medium flex items-center">
-            Transactions <span className="ml-1 text-xs text-gray-400">i</span>
-          </h2>
-          <h1 className="text-2xl font-bold text-gray-800 mt-2"></h1>
-          <p className="text-green-500 font-medium">+7.89%</p>
-          <Line data={lineData} height={80} />
+    <div className="dashboard-container">
+      {/* Section with background image and blur */}
+      <div className="background-section">
+        <div className="content">
+          <Typography
+            variant="h3"
+            component="h1"
+            gutterBottom
+            style={{ fontWeight: 'bold' }}
+          >
+            Welcome to Your {businessName ? businessName : 'Business'} Dashboard
+          </Typography>
+          <Typography variant="body1">
+            Manage tasks, view notifications, and more.
+          </Typography>
         </div>
       </div>
+
+      <div className="p-6">
+        <Grid container spacing={4} className="mt-4">
+          {/* Total Tasks Card */}
+          <Grid item xs={12} sm={6} md={4}>
+            <Card className="dashboard-card" style={{ backgroundColor: 'white', color: 'black' }}>
+              <CardContent>
+                <Typography variant="h5" component="h2">
+                  <FontAwesomeIcon icon={faTasks} className="mr-2" />
+                  Total Tasks
+                </Typography>
+                <Typography variant="h2" className="font-bold">
+                  {totalTasks}
+                </Typography>
+                <Button
+                  variant="contained"
+                  className="mt-3"
+                  sx={{
+                    backgroundColor: 'black',
+                    color: 'white',
+                    '&:hover': { backgroundColor: '#333' },
+                  }}
+                >
+                  View Tasks
+                </Button>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Pending Applications Card */}
+          <Grid item xs={12} sm={6} md={4}>
+            <Card className="dashboard-card" style={{ backgroundColor: 'white', color: 'black' }}>
+              <CardContent>
+                <Typography variant="h5" component="h2">
+                  <FontAwesomeIcon icon={faClipboardList} className="mr-2" />
+                  Pending Applications
+                </Typography>
+                <Typography variant="h2" className="font-bold">
+                  {pendingApplications}
+                </Typography>
+                <Button
+                  variant="contained"
+                  className="mt-3"
+                  sx={{
+                    backgroundColor: 'black',
+                    color: 'white',
+                    '&:hover': { backgroundColor: '#333' },
+                  }}
+                >
+                  Review Applications
+                </Button>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Notifications Card */}
+          <Grid item xs={12} sm={6} md={4}>
+            <Card className="dashboard-card" style={{ backgroundColor: 'white', color: 'black' }}>
+              <CardContent>
+                <Typography variant="h5" component="h2">
+                  <FontAwesomeIcon icon={faBell} className="mr-2" />
+                  Notifications
+                </Typography>
+                <Typography variant="h2" className="font-bold">
+                  0
+                </Typography>
+                <Button
+                  variant="contained"
+                  className="mt-3"
+                  sx={{
+                    backgroundColor: 'black',
+                    color: 'white',
+                    '&:hover': { backgroundColor: '#333' },
+                  }}
+                >
+                  View Notifications
+                </Button>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </div>
+
+      {/* Hover Effect Styles */}
+      <style>
+        {`
+          .background-section {
+            position: relative;
+            background-image: url(${backgroundImage});
+            background-size: cover;
+            background-position: center;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: black;
+          }
+
+          .background-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: inherit;
+            background-size: inherit;
+            background-position: inherit;
+            filter: blur(10px); /* Apply blur only to the background */
+            z-index: 1;
+          }
+
+          .content {
+            position: relative;
+            z-index: 2; /* Bring text above the blur */
+            color: white;
+          }
+
+          .dashboard-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+          }
+
+          .dashboard-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+          }
+        `}
+      </style>
     </div>
   );
 };

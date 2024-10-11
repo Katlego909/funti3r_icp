@@ -20,15 +20,15 @@ const BusinessProfile = () => {
             {/* Circular Placeholder for Profile Picture */}
             <div className="w-24 h-24 bg-gray-300 rounded-full flex-shrink-0"></div>
             <div className="text-center sm:text-left">
-              <h1 className="text-xl sm:text-2xl font-semibold text-purple-800">{businessProfile.name}</h1>
-              <p className="text-sm text-gray-600">{businessProfile.email}</p>
+              <h1 className="text-2xl sm:text-3xl font-semibold text-purple-800">{businessProfile.name}</h1>
+              <p className="text-base text-gray-600">{businessProfile.email}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h2 className="text-lg font-medium text-gray-700 mb-2">Business Information</h2>
-              <div className="text-sm text-gray-600 space-y-2">
+              <h2 className="text-2xl font-medium text-gray-700 mb-2">Business Information</h2> {/* Increased font size */}
+              <div className="text-base text-gray-600 space-y-2">
                 <p><strong>Name:</strong> {businessProfile.name}</p>
                 <p><strong>Email:</strong> {businessProfile.email}</p>
                 <p><strong>Phone:</strong> {businessProfile.phone}</p>
@@ -37,13 +37,13 @@ const BusinessProfile = () => {
             </div>
 
             <div>
-              <h2 className="text-lg font-medium text-gray-700 mb-2">Business Description</h2>
-              <p className="text-sm text-gray-600">{businessProfile.description}</p>
+              <h2 className="text-2xl font-medium text-gray-700 mb-2">Business Description</h2> {/* Increased font size */}
+              <p className="text-base text-gray-600">{businessProfile.description}</p>
             </div>
           </div>
         </div>
       ) : (
-        <p className="text-lg text-purple-700">Loading Business profile...</p>
+        <p className="text-xl text-purple-700">Loading Business profile...</p>
       )}
     </div>
   );

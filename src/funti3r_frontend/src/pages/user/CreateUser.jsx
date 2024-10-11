@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../authentication/use-auth-client';
+import backgroundImage from '../../assets/feature4.jpg'; // Ensure this path is correct
 
 const CreateUser = () => {
   const navigate = useNavigate();
@@ -10,22 +11,20 @@ const CreateUser = () => {
     email: '',
     phone: '',
     location: '',
-    qualifications: [], // Array for qualifications
-    socials: [], // Array for social media links
+    qualifications: [],
+    socials: [],
     description: '',
     applications: [],
-    subscription: 'none', // Default subscription value
+    subscription: 'none',
   });
-  const [error, setError] = useState(''); // State for error messages
-  const [isSubmitting, setIsSubmitting] = useState(false); // State to handle loading state during submission
-
-  // Handles input changes for form fields
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Validates form fields before submission
   const validateForm = () => {
     if (!form.name || !form.email || !form.phone || !form.location) {
       setError('Please fill in all required fields.');
@@ -38,12 +37,10 @@ const CreateUser = () => {
     return true;
   };
 
-  // Handles form submission
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setError(''); // Reset error messages
-
-    if (!validateForm()) return; // Validate before proceeding
+    setError('');
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
     try {
@@ -57,78 +54,64 @@ const CreateUser = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-lg mx-auto p-6 sm:p-8 bg-white shadow-md rounded-lg mt-6 sm:mt-12">
-      <h2 className="text-xl sm:text-2xl font-bold mb-6 text-center text-gray-800">Create User Profile</h2>
+    <div className="flex h-screen relative items-center justify-center">
+      {/* Background Image with Blur */}
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage: `url(${backgroundImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          filter: 'blur(8px)',
+        }}
+      ></div>
 
-      {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+      {/* Optional Dim Overlay */}
+      <div className="absolute inset-0 bg-black opacity-30"></div>
 
-      <div className="mb-4">
-        <input
-          type="text"
-          name="name"
-          value={form.name}
-          onChange={handleChange}
-          placeholder="Name"
-          required
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-
-      <div className="mb-4">
-        <input
-          type="email"
-          name="email"
-          value={form.email}
-          onChange={handleChange}
-          placeholder="Email"
-          required
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-
-      <div className="mb-4">
-        <input
-          type="tel"
-          name="phone"
-          value={form.phone}
-          onChange={handleChange}
-          placeholder="Phone"
-          required
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-
-      <div className="mb-4">
-        <input
-          type="text"
-          name="location"
-          value={form.location}
-          onChange={handleChange}
-          placeholder="Location"
-          required
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-
-      <div className="mb-4">
-        <textarea
-          name="description"
-          value={form.description}
-          onChange={handleChange}
-          placeholder="Description"
-          rows="4"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="w-full px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out"
+      {/* Form Container */}
+      <form
+        onSubmit={handleSubmit}
+        className="relative max-w-lg mx-auto p-6 sm:p-8 bg-white shadow-md rounded-lg z-10 mt-6 sm:mt-12"
       >
-        {isSubmitting ? 'Submitting...' : 'Submit'}
-      </button>
-    </form>
+        <h2 className="text-xl sm:text-2xl font-bold mb-6 text-center text-gray-800">Create User Profile</h2>
+
+        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+
+        {['name', 'email', 'phone', 'location', 'description'].map((field, index) => (
+          <div key={index} className="mb-4">
+            {field !== 'description' ? (
+              <input
+                type={field === 'email' ? 'email' : field === 'phone' ? 'tel' : 'text'}
+                name={field}
+                value={form[field]}
+                onChange={handleChange}
+                placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            ) : (
+              <textarea
+                name={field}
+                value={form[field]}
+                onChange={handleChange}
+                placeholder="Description"
+                rows="4"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            )}
+          </div>
+        ))}
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full px-4 py-2 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black transition duration-150 ease-in-out"
+        >
+          {isSubmitting ? 'Submitting...' : 'Submit'}
+        </button>
+      </form>
+    </div>
   );
 };
 
