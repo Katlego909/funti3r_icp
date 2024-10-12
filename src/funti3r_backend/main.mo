@@ -121,6 +121,7 @@ actor class Main() = self {
     };
       return #err("authentication needed");
   };
+  
   public shared(msg) func getMicroTaskerApplications() : async   types.Result<types.Tasks , Text> {
     if(auth.isAuthorized(msg.caller, users, businesses)) {
       let tasks =  taskModule.getMicroTaskerApplications(msg.caller, users, listedTask, completedTasks);

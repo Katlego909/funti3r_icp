@@ -8,6 +8,9 @@ import BusinessDashboard from './pages/business/BusinessDashboard';
 import BusinessProfile from './pages/business/Businessprofile';
 import CreateTask from './pages/business/CreateTask';
 import MyListedTasks from './pages/business/MyListedTasks';
+import TaskDetails from './pages/business/TaskDetails';
+
+
 import BusinessNotes from './pages/business/Notes';
 import CreateBusiness from "./pages/business/CreateBusiness"
 
@@ -52,15 +55,16 @@ const App = () => {
           )}
 
           {/* Business Routes */}
-          {isAuthenticated && profileType === 'business' && (
-            <Route path="/business" element={<BusinessLayout />}>
-              <Route path="dashboard" element={<BusinessDashboard />} />
-              <Route path="profile" element={<BusinessProfile />} />
-              <Route path="create-task" element={<CreateTask />} />
-              <Route path="my-listed-tasks" element={<MyListedTasks />} />
-              <Route path="notes" element={<BusinessNotes />} />
-            </Route>
-          )}
+{isAuthenticated && profileType === 'business' && (
+  <Route path="/business" element={<BusinessLayout />}>
+    <Route path="dashboard" element={<BusinessDashboard />} />
+    <Route path="profile" element={<BusinessProfile />} />
+    <Route path="create-task" element={<CreateTask />} />
+    <Route path="my-listed-tasks" element={<MyListedTasks />} />
+    <Route path="task-details/:taskId" element={<TaskDetails />} /> {/* Task details route */}
+    <Route path="notes" element={<BusinessNotes />} />
+  </Route>
+)}
 
           {/* Fallback to Business layout for any other unspecified paths */}
           <Route path="*" element={<Navigate to={isAuthenticated ? `/${profileType}/dashboard` : '/'} />} />

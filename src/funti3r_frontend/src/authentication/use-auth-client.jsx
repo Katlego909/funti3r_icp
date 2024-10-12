@@ -299,7 +299,7 @@ export const useAuthClient = () => {
         price: BigInt(taskData.price),
         expectedCompletionDate: formattedCompletionDate, // Update this field with the formatted date
         postedDate: formattedPostedDate, // Update this field with the formatted date
-        promisor: [], // Ensure promisor is an empty array or appropriate structure
+        promisor: [], 
       };
   
       const approvalRecord = {
@@ -336,20 +336,50 @@ export const useAuthClient = () => {
   
   
 7
-  
-    // Fetch all listed tasks
-    const fetchAllListedTasks = async () => {
-      try {
-        const result = await whoamiActor.getAllListedTasks();
-        if ("Ok" in result) {
-          setTasks(result.Ok);
-        } else {
-          console.error(result.Err);
-        }
-      } catch (err) {
-        console.error("Error fetching tasks:", err);
-      }
-    };
+// Fetch all listed tasks
+//============================================================
+const fetchAllListedTasks = async () => {
+  try {
+    const result = await whoamiActor.getAllListedTasks();
+    if ("ok" in result) {
+      return result.ok;
+    } else {
+      console.error(result.Err);
+    }
+  } catch (err) {
+    console.error("Error fetching tasks by owner:", err);
+  }
+};
+
+//============================================================
+
+
+//Propose to complete task
+//============================================================
+const proposeTask = async (taskId) => {
+  if (!isAuthenticated || !whoamiActor) {
+    console.error("User is not authenticated or whoamiActor is not initialized");
+    return { error: "Authentication required" };
+  }
+
+  try {
+    // Pass BigInt taskId to the propose function
+    const result = await whoamiActor.propose(taskId); 
+
+    if ("ok" in result) {
+      console.log("Task proposal successful:", result.ok);
+      return { success: result.ok };
+    } else {
+      console.error("Failed to propose task:", result.err);
+      return { error: result.err };
+    }
+  } catch (error) {
+    console.error("Error proposing task:", error);
+    return { error: "Failed to propose task" };
+  }
+};
+
+//============================================================
   
     // Fetch tasks by owner
     const fetchTaskByOwner = async () => {
@@ -385,6 +415,7 @@ export const useAuthClient = () => {
     businessProfile,
     createTask,
     fetchAllListedTasks,
+    proposeTask, 
     fetchTaskByOwner,
     fetchProfileType
   };
