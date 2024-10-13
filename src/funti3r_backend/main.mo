@@ -114,13 +114,23 @@ actor class Main() = self {
   // only microstaksers should call this method
   // todo:
       //==> we need to add pagination in the future
-  public shared(msg) func getAllListedTasks() : async   types.Result<types.Tasks , Text> {
+  public shared query(msg) func getAllListedTasks() : async   types.Result<types.Tasks , Text> {
     if(auth.isAuthorized(msg.caller, users, businesses)) {
       let tasks =  taskModule.getAllListedTasks(listedTask);
       return #ok(tasks);
     };
       return #err("authentication needed");
   };
+
+  public shared query(msg)  func getTaskById(id : Nat) : async types.Result<?types.TaskRecord , Text> {
+       if(auth.isAuthorized(msg.caller, users, businesses)) {
+        let task =  taskModule.getTaskById(id, listedTask, completedTasks);
+      return #ok(task);
+    };
+      return #err("authentication needed");
+  
+  };
+
   
   public shared(msg) func getMicroTaskerApplications() : async   types.Result<types.Tasks , Text> {
     if(auth.isAuthorized(msg.caller, users, businesses)) {

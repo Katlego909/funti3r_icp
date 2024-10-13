@@ -57,6 +57,23 @@ module {
      };
      return tasks;
   };
+  
+  public func getTaskById(id : Nat, listedTasks : ListedTasks, completedTasks : ListedTasks) : ?types.TaskRecord {
+       var t = Map.get(listedTasks, ihash, id);
+       switch(t){
+        case (null) {
+          return switch(Map.get(completedTasks, ihash, id)) {
+            case null return null;
+            case (?task) {
+              return ?task.getTaskRecord();
+            };
+          };
+        };
+        case(?task) {
+          return ?task.getTaskRecord();
+        }
+       }; 
+  };
 
   public func propose(proposer : Principal , taskId: Nat, listedTasks : ListedTasks, microTaskers : Users) :  types.Result<Text, Text>{
       
