@@ -380,6 +380,49 @@ const proposeTask = async (taskId) => {
 };
 
 //============================================================
+
+//getTaskById
+//============================================================
+const fetchTaskById = async (id) => {
+  if (!isAuthenticated || !whoamiActor) {
+    console.error("User is not authenticated or whoamiActor is not initialized");
+    return { error: "Authentication required" };
+  }
+
+  try {
+    // Pass BigInt taskId to the getTaskById function
+    const result = await whoamiActor.getTaskById(id); 
+
+    if ("ok" in result) {
+      console.log("Task retrieval successful:", result.ok);
+      return { success: result.ok };
+    } else {
+      console.error("Failed to retrieve task:", result.err);
+      return { error: result.err };
+    }
+  } catch (error) {
+    console.error("Error retrieving task:", error);
+    return { error: "Failed to retrieve task" };
+  }
+};
+//========================================================
+
+const fetchMicroTaskerApplications = async () => {
+  try {
+      // Call the actor's method to get microtasker applications
+      const result = await whoamiActor.getMicroTaskerApplications();
+      
+      // Check if the result is successful
+      if ("ok" in result) {
+          return result.ok; // Return the successful result
+      } else {
+          console.error(result.err); // Log the error if unsuccessful
+      }
+  } catch (err) {
+      console.error("Error fetching microtasker applications:", err); // Log any caught errors
+  }
+};
+
   
     // Fetch tasks by owner
     const fetchTaskByOwner = async () => {
@@ -417,7 +460,9 @@ const proposeTask = async (taskId) => {
     fetchAllListedTasks,
     proposeTask, 
     fetchTaskByOwner,
-    fetchProfileType
+    fetchProfileType,
+    fetchTaskById,
+    fetchMicroTaskerApplications
   };
 };
 

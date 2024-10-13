@@ -11,6 +11,7 @@ const MyListedTasks = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
+  // Function to flatten nested arrays of tasks
   const flattenTasks = (arr) => {
     let flatTasks = [];
     arr.forEach(item => {
@@ -23,6 +24,7 @@ const MyListedTasks = () => {
     return flatTasks;
   };
 
+  // Function to count the number of 'promisors' in a task
   const countPromisors = (promisors) => {
     if (!promisors) return 0;
 
@@ -40,12 +42,13 @@ const MyListedTasks = () => {
     return count;
   };
 
+  // Function to fetch tasks listed by the owner (business or user)
   const fetchTasks = async () => {
     try {
-      const fetchedTasks = await fetchTaskByOwner();
+      const fetchedTasks = await fetchTaskByOwner(); // Fetch the tasks from backend
       console.log("Fetched tasks:", fetchedTasks);
       const flatTasks = flattenTasks(fetchedTasks);
-      setTasks(flatTasks || []);
+      setTasks(flatTasks || []); // Set the tasks to state after flattening
     } catch (err) {
       console.error("Error fetching tasks:", err);
       setError('Failed to fetch tasks. Please try again later.');
@@ -54,13 +57,15 @@ const MyListedTasks = () => {
     }
   };
 
+  // Fetch business profile when the component mounts
   useEffect(() => {
     const fetchProfile = async () => {
-      await fetchBusinessProfile();
+      await fetchBusinessProfile(); // Fetch the business profile on mount
     };
     fetchProfile();
   }, [fetchBusinessProfile]);
 
+  // Fetch tasks when the user is authenticated
   useEffect(() => {
     if (isAuthenticated) {
       fetchTasks();
@@ -71,16 +76,19 @@ const MyListedTasks = () => {
 
   return (
     <div className="min-h-screen">
+      {/* Background image for the top section */}
       <div className="relative w-full h-64 sm:h-96 bg-cover bg-center" style={{ backgroundImage: `url(${backgroundImage})`, filter: 'blur(5px)' }}>
         <div className="absolute inset-0 bg-black opacity-30"></div>
       </div>
 
+      {/* Main content container */}
       <div className="p-4 sm:p-6 bg-white relative z-10">
         <div className="text-center mb-6">
           <h2 className="text-2xl sm:text-3xl font-semibold text-black">
             Tasks Listed by {businessProfile ? businessProfile.name : 'BusinessName'}
           </h2>
 
+          {/* Loading and error messages */}
           {loading && (
             <p className="text-black flex items-center justify-center mt-4">
               <FaPlus className="mr-2" /> Loading...
@@ -98,6 +106,7 @@ const MyListedTasks = () => {
           )}
         </div>
 
+        {/* Tasks grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 my-6">
           {tasks.length > 0 ? (
             tasks.map((task, index) => (
@@ -105,7 +114,7 @@ const MyListedTasks = () => {
                 key={index}
                 className="p-4 border border-gray-300 rounded-lg shadow-lg bg-white flex flex-col justify-between cursor-pointer"
                 style={{ height: '200px' }}
-                onClick={() => navigate(`/business/task-details/${task.taskId}`)}
+                onClick={() => navigate(`/business/task-details/${task.taskId}`)} // Navigate to task details page with taskId
               >
                 <div>
                   <h3 className="text-lg font-semibold text-black mb-2">{task.category || 'No Category'}</h3>
