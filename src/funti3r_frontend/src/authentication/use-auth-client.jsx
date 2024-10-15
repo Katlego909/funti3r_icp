@@ -438,6 +438,20 @@ const fetchMicroTaskerApplications = async () => {
       }
     };
   
+    
+     const accProposal = async (taskId, microTasker) => {
+      try {
+        const result = await whoamiActor.acceptProposal(taskId, microTasker);
+        if ("ok" in result) {
+          return result.ok;
+        } else {
+          console.error(result.Err);
+        }
+      } catch (err) {
+        console.error("Error accepting proposal:", err);
+      }
+    };
+    
 
   return {
     isAuthenticated,
@@ -462,7 +476,8 @@ const fetchMicroTaskerApplications = async () => {
     fetchTaskByOwner,
     fetchProfileType,
     fetchTaskById,
-    fetchMicroTaskerApplications
+    fetchMicroTaskerApplications,
+    accProposal
   };
 };
 

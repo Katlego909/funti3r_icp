@@ -7,7 +7,7 @@ import { Principal } from '@dfinity/principal';
 
 const TaskDetails = () => {
   const { taskId } = useParams();
-  const { fetchTaskById } = useAuth();
+  const { fetchTaskById, accProposal } = useAuth();
   const [task, setTask] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -30,13 +30,19 @@ const TaskDetails = () => {
         setLoading(false);
       }
     };
+    
 
     fetchTaskDetails();
   }, [taskId, fetchTaskById]);
 
-  const handleAcceptPromisor = (promisorId) => {
-    console.log(`Promisor ${promisorId} accepted`);
+  // const accProposal = async
+
+  const handleAcceptPromisor = async (microTasker) => {
+    const acceptProposal = await accProposal(BigInt(taskId), microTasker); 
+    
+    console.log(`Promisor ${acceptProposal} accepted`);
   };
+  
 
   const renderPromisorDetail = (promisorDetail) => {
     if (promisorDetail && promisorDetail._isPrincipal) {
@@ -111,42 +117,36 @@ const TaskDetails = () => {
 
         <div className="mt-4">
           <h3 className="text-lg font-semibold mb-2">Promisors:</h3>
-          {task.promisors && task.promisors.length > 0 ? (
-            <ul className="space-y-2">
-              {/* Flatten the array but check if each element is indeed an array */}
-              {task.promisors.flat().map((promisorGroup, groupIndex) =>
-                Array.isArray(promisorGroup) ? (
-                  promisorGroup.map((promisorDetail, promisorIndex) => (
-                    <li key={`${groupIndex}-${promisorIndex}`} className="flex justify-between items-center p-2 border border-gray-300 rounded-lg">
-                      <div className="space-y-1">
-                        {renderPromisorDetail(promisorDetail)}
-                      </div>
-                      <button
-                        onClick={() => handleAcceptPromisor(promisorIndex)}
-                        className="px-3 py-1 bg-black text-white rounded hover:bg-gray-700 transition text-sm"
-                      >
-                        Accept
-                      </button>
-                    </li>
-                  ))
-                ) : (
-                  <li key={groupIndex} className="flex justify-between items-center p-2 border border-gray-300 rounded-lg">
-                    <div className="space-y-1">
-                      {renderPromisorDetail(promisorGroup)}
-                    </div>
-                    <button
-                      onClick={() => handleAcceptPromisor(groupIndex)}
-                      className="px-3 py-1 bg-black text-white rounded hover:bg-gray-700 transition text-sm"
-                    >
-                      Accept
-                    </button>
-                  </li>
-                )
-              )}
-            </ul>
-          ) : (
-            <p className="text-gray-700 text-sm">No promisors available for this task.</p>
-          )}
+          {task.promisors.flat().map((promisorGroup, groupIndex) =>
+  Array.isArray(promisorGroup) ? (
+    promisorGroup.map((promisorDetail, promisorIndex) => (
+      <li key={`${groupIndex}-${promisorIndex}`} className="flex justify-between items-center p-2 border border-gray-300 rounded-lg">
+        <div className="space-y-1">
+          {renderPromisorDetail(promisorDetail)}
+        </div>
+        <button
+          onClick={() => handleAcceptPromisor(promisorDetail)} // Pass the selected promisor detail
+          className="px-3 py-1 bg-black text-white rounded hover:bg-gray-700 transition text-sm"
+        >
+          Accept
+        </button>
+      </li>
+    ))
+  ) : (
+    <li key={groupIndex} className="flex justify-between items-center p-2 border border-gray-300 rounded-lg">
+      <div className="space-y-1">
+        {renderPromisorDetail(promisorGroup)}
+      </div>
+      <button
+        onClick={() => handleAcceptPromisor(promisorGroup)} // Pass the selected promisor
+        className="px-3 py-1 bg-black text-white rounded hover:bg-gray-700 transition text-sm"
+      >
+        Accept
+      </button>
+    </li>
+  )
+)}
+
         </div>
 
         <button 

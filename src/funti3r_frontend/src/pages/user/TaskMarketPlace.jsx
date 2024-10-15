@@ -53,7 +53,7 @@ const TaskMarketPlace = () => {
 
   
   const proposeToComplete = (taskId) => {
-    const natTaskId = BigInt(taskId);  // Convert taskId to BigInt for Nat compatibility
+  const natTaskId = BigInt(taskId);  // Convert taskId to BigInt for Nat compatibility
   
     proposeTask(natTaskId)
       .then((response) => {
