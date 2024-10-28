@@ -29,8 +29,7 @@ import Login from './pages/Login';
 import ProfileSelection from './pages/common/ProfileSelection';
 
 const App = () => {
-  //  const isAuthenticated = true; // This should be updated based on your auth logic
-  //  const profileType = 'business';  // Either 'user' or 'business' based on the logged-in user
+ 
  const { isAuthenticated, profileType } = useAuth(); // Access isAuthenticated and profileType from the context
 
 

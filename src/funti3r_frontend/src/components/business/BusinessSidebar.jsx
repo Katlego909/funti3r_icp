@@ -3,11 +3,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTachometerAlt, faBriefcase, faCogs, faSignOutAlt, faTasks, faStickyNote, faList, faBell, faUserCircle, faEnvelope, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Logo from '../../assets/logo.svg';
+import { useAuth } from '../../authentication/use-auth-client';
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate(); // Importing useNavigate
+  const { logout } = useAuth();
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
@@ -18,7 +20,9 @@ const Sidebar = () => {
   const handleLogout = () => {
     // Add any logout logic here (e.g., clearing user data, tokens, etc.)
     // After logout, navigate to the login page
-    navigate('/login'); // Redirect to Login page
+  
+    logout()
+      navigate('/'); // Redirect to Login page
   };
 
   return (

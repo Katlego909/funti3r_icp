@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lexend:wght@100..900&display=swap');
+
+h1, h2, h3, h4, h5 {
+    font-family: 'Lexend', sans-serif;
+    line-height: 1.5;
+}
+
+p, li, a {
+    font-family: 'Inter-300', sans-serif;
+    font-size: 0.95rem;
+}
+
 :root {
     --color-primary: #420A63;
     --color-secondary: #FC6B26;

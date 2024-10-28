@@ -7,6 +7,7 @@ import { canisterId as canisterId2, idlFactory as idlFactory2 } from "../../../d
 //=====================
 import { AuthClient } from "@dfinity/auth-client";  
 import { Principal } from '@dfinity/principal';    
+//import { set } from "react-datepicker/dist/date_utils";
 
 // Custom hook to handle authentication and manage user state
 export const useAuthClient = () => {
@@ -117,6 +118,15 @@ export const useAuthClient = () => {
       console.error("Login failed:", error);
     }
   };
+
+  const logout = async () => {
+    setWhoamiActor(null);
+    //=================================================
+    seticpLedger(null);
+    //=================================================
+    setPrincipal(null);
+    isAuthenticated(false)
+  }
 
   const createUserProfile = async (details, navigate) => {
     if (!whoamiActor) {
@@ -477,7 +487,8 @@ const fetchMicroTaskerApplications = async () => {
     fetchProfileType,
     fetchTaskById,
     fetchMicroTaskerApplications,
-    accProposal
+    accProposal,
+    logout
   };
 };
 
