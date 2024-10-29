@@ -32,8 +32,8 @@ const UserSidebar = () => {
       </button>
 
       {/* Sidebar */}
-      <div className={`w-64 bg-black h-screen shadow-lg overflow-y-hidden border-r border-gray-400 fixed top-0 left-0 z-10 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform sm:translate-x-0`}>
-        <div className="flex items-center justify-between p-5 mb-2 bg-black">
+      <div className={`w-64 bg-gray-900 text-white h-screen shadow-lg overflow-y-hidden border-r ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform sm:translate-x-0`}>
+      <div className="flex items-center justify-between p-5 mb-2 bg-gray-900">
           <div className="flex items-center gap-2 text-3xl font-bold text-white">
             <span>Funti3r</span>
             <img src={Logo} alt="Logo" className="h-12" /> {/* Increased logo size */}
@@ -122,7 +122,7 @@ const UserSidebar = () => {
       {/* Main Content Area including header */}
       <div className="flex flex-col flex-grow ml-64">
         {/* Shortened Header */}
-        <header className="flex items-center justify-between w-full bg-black text-white py-4 px-6 fixed top-0 left-64 z-20 max-w-[calc(100%-16rem)]">
+        <header className="flex items-center justify-between w-full bg-gray-900 text-white py-4 px-6 fixed top-0 left-64 z-20 max-w-[calc(100%-16rem)]">
           {/* Search Bar */}
           <div className="flex-grow mx-2 md:mx-4 hidden sm:flex">
             <div className="relative w-full">

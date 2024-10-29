@@ -421,7 +421,13 @@ const fetchMicroTaskerApplications = async () => {
   try {
       // Call the actor's method to get microtasker applications
       const result = await whoamiActor.getMicroTaskerApplications();
+      // console.log("Output" + JSON.stringify(result));
+      const serializedResult = JSON.stringify(result, (key, value) =>
+        typeof value === 'bigint' ? value.toString() : value,
+        2
+      );
       
+      console.log("Output:", serializedResult);
       // Check if the result is successful
       if ("ok" in result) {
           return result.ok; // Return the successful result
@@ -452,6 +458,7 @@ const fetchMicroTaskerApplications = async () => {
      const accProposal = async (taskId, microTasker) => {
       try {
         const result = await whoamiActor.acceptProposal(taskId, microTasker);
+        console.log("womp womp" + result.ok);
         if ("ok" in result) {
           return result.ok;
         } else {

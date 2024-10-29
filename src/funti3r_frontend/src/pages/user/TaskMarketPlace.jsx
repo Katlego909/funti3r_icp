@@ -51,15 +51,15 @@ const TaskMarketPlace = () => {
     }
   }, [isAuthenticated]);
 
-  
+
   const proposeToComplete = (taskId) => {
-  const natTaskId = BigInt(taskId);  // Convert taskId to BigInt for Nat compatibility
-  
+    const natTaskId = BigInt(taskId);  // Convert taskId to BigInt for Nat compatibility
+
     proposeTask(natTaskId)
       .then((response) => {
         if (response.success) {
           console.log(`Proposed successfully for task: ${natTaskId}`);
-          alert('Proposal was submitted successfully!');  
+          alert('Proposal was submitted successfully!');
         } else {
           console.error(`Failed to propose task with ID: ${natTaskId}`, response.error);
           alert('Failed to submit the proposal. Please try again.');  // Show an error message if the proposal fails
@@ -70,8 +70,8 @@ const TaskMarketPlace = () => {
         alert('An error occurred while submitting the proposal.');  // Handle any network or unexpected errors
       });
   };
-  
-  
+
+
 
   return (
     <div className="min-h-screen">
@@ -112,17 +112,31 @@ const TaskMarketPlace = () => {
                   <p className="text-black text-sm mb-1">{task.description || 'No description provided.'}</p>
                   <p className="text-black text-sm"><strong>Posted Date:</strong> {task.postedDate ? new Date(task.postedDate).toLocaleDateString() : 'N/A'}</p>
                   <p className="text-black text-sm"><strong>Expected Completion:</strong> {task.expectedCompletionDate ? new Date(task.expectedCompletionDate).toLocaleDateString() : 'N/A'}</p>
+                  <p className="text-xs text-black">
+                    Price: <span className="font-semibold">{task.price !== undefined ? `${task.price} ICP` : 'N/A'}</span> |
+                     </p>
                 </div>
                 <div className="mt-auto">
-                  <p className="text-xs text-black">
-                    Price: <span className="font-semibold">{task.price !== undefined ? `${task.price} ICP` : 'N/A'}</span> | 
-                    Status: <span className={task.completed ? 'text-green-600' : 'text-red-600'}>{task.completed ? 'Completed' : 'Pending'}</span>
+                
+                  <p className="text-gray-700 mb-2 text-sm">
+                    <strong>Status:</strong>
+                    <span
+                      className={
+                        task.completed
+                          ? 'text-green-600'
+                          : task.inProgress
+                            ? 'text-yellow-600'
+                            : 'text-red-600'
+                      }
+                    >
+                      {task.completed ? 'Completed' : task.inProgress ? 'In Progress' : 'Pending'}
+                    </span>
                   </p>
 
                   {/* Conditionally render the button if the task is pending */}
-                  {!task.completed && (
-                    <button 
-                      onClick={() => proposeToComplete(task.taskId)} 
+                  {!task.inProgress && (
+                    <button
+                      onClick={() => proposeToComplete(task.taskId)}
                       className="mt-2 bg-black hover:bg-gray-800 text-white font-bold py-1 px-2 text-sm rounded"
                     >
                       Propose to Complete

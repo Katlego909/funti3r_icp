@@ -88,12 +88,12 @@ const UserProfile = () => {
 
           {/* Applications section */}
           <div>
-            <h2 className="text-2xl font-medium text-gray-700 mb-2">Microtasker Applications</h2>
+            <h2 className="text-2xl font-medium text-gray-700 mb-2">My Applications</h2>
             <div className="space-y-2">
               {applications.length > 0 ? (
                 applications.map((app, index) => (
                   <div key={index} className="p-4 border border-gray-300 rounded-lg shadow-lg bg-white">
-                    <p><strong>Task:</strong> {app.taskName}</p>
+                    <p><strong>Task:</strong> {app}</p>
                     <p><strong>Status:</strong> {app.status}</p>
                   </div>
                 ))

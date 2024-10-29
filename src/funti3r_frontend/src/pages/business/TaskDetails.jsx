@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../authentication/use-auth-client';
 import backgroundImage from '../../assets/feature4.jpg';
 import { FaExclamationTriangle } from 'react-icons/fa';
-import { Principal } from '@dfinity/principal'; 
+import { Principal } from '@dfinity/principal';
 
 const TaskDetails = () => {
   const { taskId } = useParams();
@@ -11,6 +11,7 @@ const TaskDetails = () => {
   const [task, setTask] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [inProgress, setInProgress] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,24 +31,37 @@ const TaskDetails = () => {
         setLoading(false);
       }
     };
-    
 
     fetchTaskDetails();
   }, [taskId, fetchTaskById]);
 
-  // const accProposal = async
+  const handleAcceptPromisor = async (microTasker, promisorKey) => {
+    const acceptProposal = await accProposal(BigInt(taskId), microTasker);
 
-  const handleAcceptPromisor = async (microTasker) => {
-    const acceptProposal = await accProposal(BigInt(taskId), microTasker); 
-    
-    console.log(`Promisor ${acceptProposal} accepted`);
+    if (acceptProposal) {
+      // Display alert after successful proposal acceptance
+      alert(`Promisor ${acceptProposal} has been accepted successfully!`);
+
+      console.log(`Promisor ${acceptProposal} accepted`);
+
+      // Update the inProgress state and the task's inProgress field
+      setInProgress((prev) => ({
+        ...prev,
+        [promisorKey]: true
+      }));
+
+      // Update the task state for re-rendering (optional if you need to reflect the `inProgress` field)
+      setTask((prevTask) => ({
+        ...prevTask,
+        inProgress: true
+      }));
+    }
   };
-  
 
   const renderPromisorDetail = (promisorDetail) => {
     if (promisorDetail && promisorDetail._isPrincipal) {
       try {
-        const principal = Principal.fromUint8Array(promisorDetail._arr); 
+        const principal = Principal.fromUint8Array(promisorDetail._arr);
         return <p className="text-gray-800 text-sm">{principal.toText()}</p>;
       } catch (error) {
         console.error("Failed to convert principal:", error);
@@ -56,23 +70,7 @@ const TaskDetails = () => {
     }
     return <p className="text-gray-800 text-sm">Unknown User</p>;
   };
-  
-  const renderAllPromisors = (promisors) => {
-    return (
-      <div>
-        {promisors.map((promisorGroup, index) => (
-          <div key={index}>
-            {promisorGroup.map((promisor, promIndex) => (
-              <div key={promIndex}>
-                {renderPromisorDetail(promisor)}
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-    );
-  };
-  
+
   if (loading) {
     return <p className="text-center text-sm">Loading task details...</p>;
   }
@@ -118,35 +116,41 @@ const TaskDetails = () => {
         <div className="mt-4">
           <h3 className="text-lg font-semibold mb-2">Promisors:</h3>
           {task.promisors.flat().map((promisorGroup, groupIndex) =>
-  Array.isArray(promisorGroup) ? (
-    promisorGroup.map((promisorDetail, promisorIndex) => (
-      <li key={`${groupIndex}-${promisorIndex}`} className="flex justify-between items-center p-2 border border-gray-300 rounded-lg">
-        <div className="space-y-1">
-          {renderPromisorDetail(promisorDetail)}
-        </div>
-        <button
-          onClick={() => handleAcceptPromisor(promisorDetail)} // Pass the selected promisor detail
-          className="px-3 py-1 bg-black text-white rounded hover:bg-gray-700 transition text-sm"
-        >
-          Accept
-        </button>
-      </li>
-    ))
-  ) : (
-    <li key={groupIndex} className="flex justify-between items-center p-2 border border-gray-300 rounded-lg">
-      <div className="space-y-1">
-        {renderPromisorDetail(promisorGroup)}
-      </div>
-      <button
-        onClick={() => handleAcceptPromisor(promisorGroup)} // Pass the selected promisor
-        className="px-3 py-1 bg-black text-white rounded hover:bg-gray-700 transition text-sm"
-      >
-        Accept
-      </button>
-    </li>
-  )
-)}
-
+            Array.isArray(promisorGroup) ? (
+              promisorGroup.map((promisorDetail, promisorIndex) => {
+                const promisorKey = `${groupIndex}-${promisorIndex}`;
+                return (
+                  <li key={promisorKey} className="flex justify-between items-center p-2 border border-gray-300 rounded-lg">
+                    <div className="space-y-1">
+                      {renderPromisorDetail(promisorDetail)}
+                    </div>
+                    {!inProgress[promisorKey] && (
+                      <button
+                        onClick={() => handleAcceptPromisor(promisorDetail, promisorKey)}
+                        className="px-3 py-1 bg-black text-white rounded hover:bg-gray-700 transition text-sm"
+                      >
+                        Accept
+                      </button>
+                    )}
+                  </li>
+                );
+              })
+            ) : (
+              <li key={groupIndex} className="flex justify-between items-center p-2 border border-gray-300 rounded-lg">
+                <div className="space-y-1">
+                  {renderPromisorDetail(promisorGroup)}
+                </div>
+                {!inProgress[groupIndex] && (
+                  <button
+                    onClick={() => handleAcceptPromisor(promisorGroup, groupIndex)}
+                    className="px-3 py-1 bg-black text-white rounded hover:bg-gray-700 transition text-sm"
+                  >
+                    Accept
+                  </button>
+                )}
+              </li>
+            )
+          )}
         </div>
 
         <button 
