@@ -131,7 +131,16 @@ actor class Main() = self {
   
   };
 
-  
+ // public shared query({caller}) func getTaskByPromisor() :  async   types.Result<[types.Tasks] , Text>{
+//create a buffer variable to store the tasks for the promisor
+//map through the tasks 
+//switch on the task promisor 
+//if the tasks has a promisor and the promisor = caller, add the task to the buffer
+//if the task does not have a promisor, continue
+//when loop finishes, convert the buffer to an array, then return the array
+//};
+
+
   public shared(msg) func getMicroTaskerApplications() : async   types.Result<types.Tasks , Text> {
     if(auth.isAuthorized(msg.caller, users, businesses)) {
       let tasks =  taskModule.getMicroTaskerApplications(msg.caller, users, listedTask, completedTasks);

@@ -90,6 +90,7 @@ export const useAuthClient = () => {
 //============
 
         const principal = await window.ic.plug.agent.getPrincipal();
+       // const principald = await window.ic.plug.disconnect(); Logout
         setIsAuthenticated(true);
         return { actor, actor2, principal }; // Return actor and principal (added actor2)
 
