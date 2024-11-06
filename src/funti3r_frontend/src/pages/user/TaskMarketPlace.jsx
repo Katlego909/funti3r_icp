@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../authentication/use-auth-client';
 import { FaExclamationTriangle, FaTasks, FaPlus } from 'react-icons/fa';
-import backgroundImage from '../../assets/feature4.jpg'; // Ensure this is the correct path
+import backgroundImage from '../../assets/feature4.jpg'; 
 
 const TaskMarketPlace = () => {
-  const { isAuthenticated, fetchAllListedTasks, proposeTask, fetchBusinessProfile, whoamiActor, principal } = useAuth(); // Make sure to include whoamiActor and principal
+  const { isAuthenticated, fetchAllListedTasks, proposeTask, fetchBusinessProfile, whoamiActor, principal } = useAuth(); 
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

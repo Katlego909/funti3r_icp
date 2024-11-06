@@ -307,8 +307,8 @@ export const useAuthClient = () => {
         ...taskData,
         taskId: taskIdBigInt,
         price: BigInt(taskData.price),
-        expectedCompletionDate: formattedCompletionDate, // Update this field with the formatted date
-        postedDate: formattedPostedDate, // Update this field with the formatted date
+        expectedCompletionDate: formattedCompletionDate, // Updated this field with the formatted date
+        postedDate: formattedPostedDate, // Updated this field with the formatted date
         promisor: [], 
       };
   
