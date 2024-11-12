@@ -10,8 +10,8 @@ import Option "mo:base/Option";
 import Nat64 "mo:base/Nat64";
 import Blob "mo:base/Blob";
 import Result "mo:base/Result";
-import  userInfo "components/UserDetails";
-import  businesInfo "components/BusinessDetails";
+import userInfo "components/UserDetails";
+import businesInfo "components/BusinessDetails";
 import Task "components/Task";
 import taskModule "./modules/task";
 import auth "./modules/auth";
@@ -23,7 +23,6 @@ import Debug "mo:base/Debug";
 
 //importing canisters
 import  ledger "canister:icp_ledger_canister"; // no error here as well
-
 
 actor class Main() = self {
 
@@ -78,6 +77,54 @@ actor class Main() = self {
           auth.loginB(msg.caller, businesses);
   };
 
+  // IdentityKit
+
+    // Initialize user and business maps
+    stable var users: auth.Users = Map.new<Principal, UserDetails.UserDetails>(10, phash);
+    stable var businesses: auth.Businesses = Map.new<Principal, BusinessDetails.BusinessDetails>(10, phash);
+
+    // Expose a function to create a user profile
+    public func createUserProfile(p: Principal, details: UserDetails.UserDetailsRecord): Text {
+        switch auth.createUserProfile(p, details, users) {
+            case (#ok(message)) return message;
+            case (#err(error)) return error;
+        }
+    };
+
+    // Expose a function to create a business profile
+    public func createBusinessProfile(p: Principal, details: BusinessDetails.BusinessDetailsRecord): Text {
+        switch auth.createBusiness(p, details, businesses) {
+            case (#ok(message)) return message;
+            case (#err(error)) return error;
+        }
+    };
+
+    // Expose a function to check if a user is authorized
+    public func isAuthorized(p: Principal): Bool {
+        return auth.isAuthorized(p, users, businesses);
+    };
+
+    // Expose a function to log in a user
+    public func loginUser(p: Principal): Text {
+        switch auth.loginUser(p, users) {
+            case (#ok(user)) return "Welcome, " # user.name # "!";
+            case (#err(error)) return error;
+        }
+    };
+
+    // Expose a function to log in a business
+    public func loginBusiness(p: Principal): Text {
+        switch auth.loginB(p, businesses) {
+            case (#ok(business)) return "Welcome, " # business.name # "!";
+            case (#err(error)) return error;
+        }
+    };
+
+    // Expose the IdentityKit config
+    public func getIdentityConfig(): IdentityKit.Config {
+        return auth.getIdentityConfig();
+    };
+
 //=================================================== Auth ends here ===================================================================
 
 // ================================================= Tasks related functions ============================================================
@@ -114,6 +161,7 @@ actor class Main() = self {
   // only microstaksers should call this method
   // todo:
       //==> we need to add pagination in the future
+
   public shared query(msg) func getAllListedTasks() : async   types.Result<types.Tasks , Text> {
     if(auth.isAuthorized(msg.caller, users, businesses)) {
       let tasks =  taskModule.getAllListedTasks(listedTask);
@@ -130,16 +178,6 @@ actor class Main() = self {
       return #err("authentication needed");
   
   };
-
- // public shared query({caller}) func getTaskByPromisor() :  async   types.Result<[types.Tasks] , Text>{
-//create a buffer variable to store the tasks for the promisor
-//map through the tasks 
-//switch on the task promisor 
-//if the tasks has a promisor and the promisor = caller, add the task to the buffer
-//if the task does not have a promisor, continue
-//when loop finishes, convert the buffer to an array, then return the array
-//};
-
 
   public shared(msg) func getMicroTaskerApplications() : async   types.Result<types.Tasks , Text> {
     if(auth.isAuthorized(msg.caller, users, businesses)) {
@@ -160,6 +198,35 @@ actor class Main() = self {
   };
 
 
+// Get all task applied for by User/Microtasker
+    public shared query({caller}) func getTasksByPromisor() : async types.Result<[types.TaskRecord], Text> {
+    // Check if the caller is authorized.
+    if (auth.isAuthorized(caller, users, businesses)) {
+        // Declare a buffer to collect matching tasks.
+        var buffer: List.List<types.TaskRecord> = List.nil();
+
+        // Iterate through all entries in the listedTask map.
+        for ((id, task) in Map.entries(listedTask)) {
+            switch (task.getPromisor()) {
+                case (?promisor) {
+                    // If the promisor matches the caller, add the task record to the buffer.
+                    if (promisor == caller) {
+                        buffer := List.push(task.getTaskRecord(), buffer);
+                    };
+                };
+                case null {}; // Skip tasks with a null promisor.
+            };
+        };
+
+        // Convert the collected tasks in the buffer to an array and return them.
+        return #ok(List.toArray(buffer));
+    };
+
+    // Return an error if the caller is not authorized.
+    return #err("authentication needed");
+};
+
+// Propose
   public shared(msg) func propose(taskId: Nat) : async types.Result<Text, Text>{
          if(auth.isAuthorized(msg.caller, users, businesses)) {
             let  r = taskModule.propose(msg.caller, taskId, listedTask, users);

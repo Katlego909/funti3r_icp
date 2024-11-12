@@ -56,18 +56,17 @@ const handleLogin = async () => {
   };
 
   return (
-    <>
-    <NavBar />
-    <Hero />
-    <TrustedBy />
-    <DriveSuccess />
-    <TheBenefits />
-    <WhyChooseUs />
-    <TheDifference />
-    <CTA />
-    <Footer />
-    </>
-    
+    <div>
+      <NavBar />
+      <Hero />
+      <TrustedBy />
+      <DriveSuccess />
+      <TheBenefits />
+      <WhyChooseUs />
+      <TheDifference />
+      <CTA />
+      <Footer />
+    </div>
     // <div className="min-h-screen bg-white">
     //   {/* Header Section with Navigation Tabs */}
     //   <header className="w-full bg-black text-white px-6 py-4 fixed top-0 z-20" style={{ backgroundColor: '#0e0e0e' }}>

@@ -23,6 +23,9 @@ export default defineConfig({
       "/api": {
         target: "http://127.0.0.1:4943",
         changeOrigin: true,
+        server: {
+          port: 8000,
+        },
       },
     },
   },
@@ -42,6 +45,7 @@ export default defineConfig({
         replacement: fileURLToPath(
           new URL("../declarations", import.meta.url)
         ),
+        '@nfid/identitykit/react': '/node_modules/@nfid/identitykit/react',
       },
     ],
   },

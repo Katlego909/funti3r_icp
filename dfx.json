@@ -17,7 +17,11 @@
       "dependencies": ["funti3r_backend"],
       "source": ["src/funti3r_frontend/dist"],
       "type": "assets",
-      "workspace": "funti3r_frontend"
+      "workspace": "funti3r_frontend",
+      "entries": [
+        ".",
+        ".well-known"
+      ]
     },
 
 

@@ -11,7 +11,7 @@ const TrustedBy = () => {
     <section id="trusted-by" className="py-12 bg-gray-100">
       <div className="container mx-auto px-4">
         <h2 className="text-xl font-semibold-200 text-left mb-8">Trusted by</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        <div className="grid grid-cols-2 align-right sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {logos.map((logo, index) => (
             <div key={index} className="flex items-center justify-start">
               <img

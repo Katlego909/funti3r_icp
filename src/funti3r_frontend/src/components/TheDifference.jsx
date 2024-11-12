@@ -60,9 +60,9 @@ const ContentSection = () => {
       </div>
 
       {/* Solid button (no gradients) */}
-      <button className="mt-8 px-6 py-3 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-700 transition duration-300">
+      <a href='' className="mt-8 px-6 py-3 bg-blue-500 text-white text-center font-semibold rounded-md hover:bg-blue-700 transition duration-300">
         Get Started
-      </button>
+      </a>
     </div>
   );
 };
@@ -76,7 +76,7 @@ const FeatureAccordion = ({ icon: Icon, title, description, isOpen, toggleAccord
     >
       <div className="flex items-center">
         <Icon className="h-6 w-6 mr-4" />
-        <h3 className="text-md font-semibold-100 text-gray-900">{title}</h3>
+        <h3 className="text-sm font-semibold-100 text-gray-900">{title}</h3>
       </div>
       <ChevronDownIcon
         className={`h-6 w-6 text-gray-500 transform transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}

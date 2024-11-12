@@ -31,7 +31,6 @@ export const useAuthClient = () => {
   const nnsCanisterId = 'ryjl3-tyaaa-aaaaa-aaaba-cai';
 
 
-
   useEffect(() => {
     const initializeAuthClient = async () => {
       try {
@@ -87,6 +86,7 @@ export const useAuthClient = () => {
           interfaceFactory: idlFactory2,
           host: "http://127.0.0.1:4943", 
         })
+
 //============
 
         const principal = await window.ic.plug.agent.getPrincipal();
@@ -146,8 +146,6 @@ export const useAuthClient = () => {
       
       console.log("existingProfile:", JSON.stringify(existingProfile, null, 2));
      
-
-
 
       if ("ok" in existingProfile) {
         console.warn("User profile already exists. Redirecting to user dashboard...");
@@ -486,8 +484,6 @@ const fetchMicroTaskerApplications = async () => {
     fetchBusinessProfile,
     fetchTasks,
     principal,
-    userProfile,
-    businessProfile,
     createTask,
     fetchAllListedTasks,
     proposeTask, 

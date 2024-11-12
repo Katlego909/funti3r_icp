@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth} from '../src/authentication/use-auth-client';
+import './App.css';
 
 // Business imports
 import BusinessLayout from './components/business/BusinessLayout';
@@ -24,16 +25,14 @@ import CreateUser from './pages/user/CreateUser';
 
 // Other
 import Login from './pages/Login';
-
-
 import ProfileSelection from './pages/common/ProfileSelection';
 
 const App = () => {
  
  const { isAuthenticated, profileType } = useAuth(); // Access isAuthenticated and profileType from the context
 
-
   return (
+
       <Router>
         <Routes>
           {/* Login Route */}
@@ -54,16 +53,16 @@ const App = () => {
           )}
 
           {/* Business Routes */}
-{isAuthenticated && profileType === 'business' && (
-  <Route path="/business" element={<BusinessLayout />}>
-    <Route path="dashboard" element={<BusinessDashboard />} />
-    <Route path="profile" element={<BusinessProfile />} />
-    <Route path="create-task" element={<CreateTask />} />
-    <Route path="my-listed-tasks" element={<MyListedTasks />} />
-    <Route path="task-details/:taskId" element={<TaskDetails />} /> {/* Task details route */}
-    <Route path="notes" element={<BusinessNotes />} />
-  </Route>
-)}
+          {isAuthenticated && profileType === 'business' && (
+            <Route path="/business" element={<BusinessLayout />}>
+              <Route path="dashboard" element={<BusinessDashboard />} />
+              <Route path="profile" element={<BusinessProfile />} />
+              <Route path="create-task" element={<CreateTask />} />
+              <Route path="my-listed-tasks" element={<MyListedTasks />} />
+              <Route path="task-details/:taskId" element={<TaskDetails />} /> {/* Task details route */}
+              <Route path="notes" element={<BusinessNotes />} />
+            </Route>
+          )}
 
           {/* Fallback to Business layout for any other unspecified paths */}
           <Route path="*" element={<Navigate to={isAuthenticated ? `/${profileType}/dashboard` : '/'} />} />
@@ -71,7 +70,6 @@ const App = () => {
       </Router>
   );
 };
-
 
 export default () => (
   <AuthProvider>

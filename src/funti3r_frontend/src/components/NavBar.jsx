@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import logo from '../assets/logo.png'
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../authentication/use-auth-client';
+import { IdentityKitProvider, IdentityKitTheme } from "@nfid/identitykit/react";
+import { NFIDW } from "@nfid/identitykit";
 
 const NavBar = () => {
   // State to manage mobile menu visibility
@@ -62,7 +64,7 @@ const handleLogin = async () => {
 
           {/* Get started buttons */}
           <div className="hidden md:flex space-x-4">
-            <button onClick={handleLogin} className="px-6 py-3 font-semibold text-white bg-blue-500 rounded-md hover:bg-blue-500">Login</button>
+            <button onClick={handleLogin} className="px-6 py-3 text-sm font-semibold text-white bg-blue-500 rounded-md hover:bg-blue-500">Login</button>
             <a href="#" className="px-6 py-3 font-semibold text-white bg-gray-800 rounded-md hover:bg-blue-500">Plug Wallet</a>
           </div>
 
