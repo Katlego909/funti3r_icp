@@ -77,54 +77,6 @@ actor class Main() = self {
           auth.loginB(msg.caller, businesses);
   };
 
-  // IdentityKit
-
-    // Initialize user and business maps
-    stable var users: auth.Users = Map.new<Principal, UserDetails.UserDetails>(10, phash);
-    stable var businesses: auth.Businesses = Map.new<Principal, BusinessDetails.BusinessDetails>(10, phash);
-
-    // Expose a function to create a user profile
-    public func createUserProfile(p: Principal, details: UserDetails.UserDetailsRecord): Text {
-        switch auth.createUserProfile(p, details, users) {
-            case (#ok(message)) return message;
-            case (#err(error)) return error;
-        }
-    };
-
-    // Expose a function to create a business profile
-    public func createBusinessProfile(p: Principal, details: BusinessDetails.BusinessDetailsRecord): Text {
-        switch auth.createBusiness(p, details, businesses) {
-            case (#ok(message)) return message;
-            case (#err(error)) return error;
-        }
-    };
-
-    // Expose a function to check if a user is authorized
-    public func isAuthorized(p: Principal): Bool {
-        return auth.isAuthorized(p, users, businesses);
-    };
-
-    // Expose a function to log in a user
-    public func loginUser(p: Principal): Text {
-        switch auth.loginUser(p, users) {
-            case (#ok(user)) return "Welcome, " # user.name # "!";
-            case (#err(error)) return error;
-        }
-    };
-
-    // Expose a function to log in a business
-    public func loginBusiness(p: Principal): Text {
-        switch auth.loginB(p, businesses) {
-            case (#ok(business)) return "Welcome, " # business.name # "!";
-            case (#err(error)) return error;
-        }
-    };
-
-    // Expose the IdentityKit config
-    public func getIdentityConfig(): IdentityKit.Config {
-        return auth.getIdentityConfig();
-    };
-
 //=================================================== Auth ends here ===================================================================
 
 // ================================================= Tasks related functions ============================================================
