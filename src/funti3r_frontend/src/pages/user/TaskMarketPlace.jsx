@@ -4,7 +4,7 @@ import { FaExclamationTriangle, FaTasks, FaPlus } from 'react-icons/fa';
 import backgroundImage from '../../assets/feature4.jpg'; 
 
 const TaskMarketPlace = () => {
-  const { isAuthenticated, fetchAllListedTasks, proposeTask, fetchBusinessProfile, whoamiActor, principal } = useAuth(); 
+  const { isAuthenticated, fetchAllListedTasks, proposeTask, fetchUserProfile, whoamiActor, principal } = useAuth(); 
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -38,10 +38,10 @@ const TaskMarketPlace = () => {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      await fetchBusinessProfile();
+      await fetchUserProfile();
     };
     fetchProfile();
-  }, [fetchBusinessProfile]);
+  }, [fetchUserProfile]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -129,7 +129,7 @@ const TaskMarketPlace = () => {
                             : 'text-red-600'
                       }
                     >
-                      {task.completed ? 'Completed' : task.inProgress ? 'In Progress' : 'Pending'}
+                      {task.completed ? 'Completed' : task.inProgress ? 'Assigned' : 'Pending'}
                     </span>
                   </p>
 

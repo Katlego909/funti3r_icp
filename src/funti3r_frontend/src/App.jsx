@@ -21,6 +21,7 @@ import UserDashboard from './pages/user/UserDashboard';
 import UserTaskMarketPlace from './pages/user/TaskMarketPlace';
 import UserProfile from './pages/user/UserProfile';
 import UserNotes from './pages/user/Notes';
+import UserTasks from './pages/user/MyTasks';
 import CreateUser from './pages/user/CreateUser';
 
 // Other
@@ -49,6 +50,7 @@ const App = () => {
               <Route path="task-marketplace" element={<UserTaskMarketPlace />} />
               <Route path="profile" element={<UserProfile />} />
               <Route path="notes" element={<UserNotes />} />
+              <Route path="tasks" element={<UserTasks />} />
             </Route>
           )}
 

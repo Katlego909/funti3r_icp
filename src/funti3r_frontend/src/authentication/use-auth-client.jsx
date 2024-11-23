@@ -452,12 +452,28 @@ const fetchMicroTaskerApplications = async () => {
         console.error("Error fetching tasks by owner:", err);
       }
     };
-  
-    
+
+
+//============================get task per promisor========================
+        const getTasksByPromisor = async () => {
+          try {
+            const result = await whoamiActor.getTasksByPromisor();
+            if ("ok" in result) {
+              return result.ok;
+            } else {
+              console.error(result.Err);
+            }
+          } catch (err) {
+            console.error("Error fetching tasks by owner:", err);
+          }
+        };
+//=========================================================================
+
+
      const accProposal = async (taskId, microTasker) => {
       try {
         const result = await whoamiActor.acceptProposal(taskId, microTasker);
-        console.log("womp womp" + result.ok);
+        console.log("Success" + result.ok);
         if ("ok" in result) {
           return result.ok;
         } else {
@@ -468,6 +484,59 @@ const fetchMicroTaskerApplications = async () => {
       }
     };
     
+
+    //complete task==================================
+    const ProposetoupdateCompletionStatus = async (taskId) => {
+      if (!isAuthenticated || !whoamiActor) {
+        console.error("User is not authenticated or whoamiActor is not initialized");
+        return { error: "Authentication required" };
+      }
+    
+      try {
+        // Pass BigInt taskId to the propose function
+        const result = await whoamiActor.completeTask(taskId); 
+    
+        if ("ok" in result) {
+          console.log("Task completion was successful:", result.ok);
+          return { success: result.ok };
+        } else {
+          console.error("Failed to complete task:", result.err);
+          return { error: result.err };
+        }
+      } catch (error) {
+        console.error("Error completing task:", error);
+        return { error: "Failed to complete task" };
+      }
+    };
+    //================================================
+
+    //Verify Task===========================================
+
+    const verifyTaskCompletion = async (taskId, isSuccessfullyCompleted) => {
+      if (!isAuthenticated || !whoamiActor) {
+        console.error("User is not authenticated or whoamiActor is not initialized");
+        return { error: "Authentication required" };
+      }
+    
+      try {
+        // Pass taskId and isSuccessfullyCompleted to the verifyWork function
+        const result = await whoamiActor.verifyWork(BigInt(taskId), isSuccessfullyCompleted);
+    
+        if ("ok" in result) {
+          console.log("Task Verification was successful:", result.ok);
+          return { success: result.ok };
+        } else {
+          console.error("Failed to verify task:", result.err);
+          return { error: result.err };
+        }
+      } catch (error) {
+        console.error("Error verifying task:", error);
+        return { error: "Failed to verify task" };
+      }
+    };
+    
+
+    //======================================================
 
   return {
     isAuthenticated,
@@ -487,11 +556,14 @@ const fetchMicroTaskerApplications = async () => {
     createTask,
     fetchAllListedTasks,
     proposeTask, 
+    ProposetoupdateCompletionStatus,
     fetchTaskByOwner,
     fetchProfileType,
     fetchTaskById,
     fetchMicroTaskerApplications,
     accProposal,
+    getTasksByPromisor,
+    verifyTaskCompletion,
     logout
   };
 };
