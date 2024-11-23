@@ -90,7 +90,6 @@ export const useAuthClient = () => {
 //============
 
         const principal = await window.ic.plug.agent.getPrincipal();
-       // const principald = await window.ic.plug.disconnect(); Logout
         setIsAuthenticated(true);
         return { actor, actor2, principal }; // Return actor and principal (added actor2)
 
@@ -121,12 +120,17 @@ export const useAuthClient = () => {
   };
 
   const logout = async () => {
-    setWhoamiActor(null);
-    //=================================================
-    seticpLedger(null);
-    //=================================================
-    setPrincipal(null);
-    isAuthenticated(false)
+  //  try {
+  //   if (window.ic && window.ic.plug) {
+  //      await window.ic.plug.disconnect(); // Disconnect from Plug Wallet
+  //      setIsAuthenticated(false); // Update authentication state
+    //    console.log("User has been logged out.");
+   //   } else {
+   //     console.error("Plug Wallet is not available.");
+  //    }
+   // } catch (error) {
+   //   console.error("Error during logout:", error);
+   // }
   }
 
   const createUserProfile = async (details, navigate) => {
